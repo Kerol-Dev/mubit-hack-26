@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.wellby/
+artifacts/
+.DS_Store
+*.log
+*.sqlite
+*.sqlite-*
+*.db
+*.pem
+*.key
+coverage/
+# Local operational journals contain machine-specific paths and session notes.
+OVERNIGHT.md
+TESTING.md

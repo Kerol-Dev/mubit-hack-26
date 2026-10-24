@@ -1,0 +1,40 @@
+{
+  "name": "wellby",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch server/index.ts",
+    "build": "tsc --noEmit && vite build",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "test": "node --import tsx --test server/*.test.ts",
+    "format": "prettier --write src server shared docs .github README.md package.json tsconfig.json vite.config.ts index.html",
+    "format:check": "prettier --check src server shared docs .github README.md package.json tsconfig.json vite.config.ts index.html"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@radix-ui/react-dialog": "^1.3.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsx": "^4.20.6",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10"
+  },
+  "description": "Wellby patient portal: symptom intake, care navigation, demo appointments and Mubit model comparison",
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}

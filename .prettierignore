@@ -1,0 +1,9 @@
+node_modules
+dist
+.wellby
+artifacts
+.env
+.env.*
+package-lock.json
+OVERNIGHT.md
+TESTING.md

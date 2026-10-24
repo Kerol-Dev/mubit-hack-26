@@ -1,0 +1,834 @@
+/* Patient essentials: one primary action, clear appointments, progressive detail. */
+.practice-portal {
+  --ink: #16382d;
+  --muted: #52665d;
+  background: #f5f6f3;
+  color: var(--ink);
+}
+.practice-portal .practice-masthead {
+  max-width: 1240px;
+  margin: auto;
+  min-height: 94px;
+  padding: 22px 32px;
+  background: transparent;
+  border: 0;
+}
+.practice-portal .practice-brand .brand-word {
+  font-size: 38px;
+}
+.practice-portal .practice-brand svg {
+  width: 32px;
+  height: 32px;
+}
+.practice-portal .masthead-practice {
+  padding-left: 24px;
+  margin-left: 26px;
+}
+.practice-portal .masthead-practice strong {
+  font-size: 14px;
+}
+.practice-portal .masthead-practice > span {
+  font-size: 12px;
+  margin-top: 5px;
+}
+.portal-demo-tag {
+  font:
+    600 10px/1.2 Arial,
+    sans-serif;
+  letter-spacing: 0.4px;
+  background: #e1e8df;
+  padding: 3px 6px;
+  border-radius: 3px;
+  margin-left: 7px;
+  color: #385246;
+}
+.practice-portal .masthead-user > span {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+}
+.practice-portal .masthead-user strong {
+  font-size: 14px;
+}
+.practice-portal .masthead-user small {
+  font-size: 11px;
+}
+.practice-portal .practice-navigation {
+  max-width: 1176px;
+  margin: auto;
+  background: transparent;
+  padding: 0;
+  border-top: 0;
+  border-bottom: 1px solid #ccd6ce;
+  min-height: 52px;
+  justify-content: flex-start;
+}
+.practice-portal .practice-navigation nav {
+  gap: 30px;
+}
+.practice-portal .practice-navigation nav > button {
+  padding: 16px 0;
+  font-size: 14px;
+  color: #52665d;
+}
+.practice-portal .practice-navigation nav > button.active {
+  color: #173f30;
+  border-bottom: 3px solid #173f30;
+  font-weight: 700;
+}
+.practice-portal .page {
+  max-width: 1240px;
+  margin: auto;
+  padding: 40px 32px 0;
+}
+.practice-portal .portal-main {
+  background: transparent;
+}
+.simple-home button,
+.simple-home a {
+  font: inherit;
+}
+.simple-home button:focus-visible,
+.simple-home a:focus-visible {
+  outline: 3px solid #367c60;
+  outline-offset: 5px;
+}
+.simple-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+.simple-welcome h1 {
+  font:
+    400 clamp(30px, 3vw, 42px)/1.15 Georgia,
+    serif;
+  letter-spacing: -1px;
+  margin: 0 0 10px;
+  color: #173c2e;
+}
+.simple-welcome p {
+  font-size: 15px;
+  color: #52665d;
+  margin: 0;
+}
+.simple-welcome > span {
+  font-size: 13px;
+  color: #52665d;
+}
+.simple-priorities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.simple-start,
+.simple-appointment {
+  border-radius: 10px;
+  min-width: 0;
+  min-height: 270px;
+}
+.simple-start {
+  background: #153e2d;
+  color: #fff;
+  padding: 30px 32px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px 18px;
+  align-content: center;
+  box-shadow: 0 3px 8px #143b2a0a;
+}
+.simple-icon {
+  height: 44px;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  background: #ffffff14;
+  border-radius: 12px;
+  color: #d2e2d4;
+}
+.simple-start h2 {
+  font:
+    400 32px/1.15 Georgia,
+    serif;
+  color: white;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+.simple-start p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #e3ece5;
+  margin: 0;
+}
+.simple-start > button {
+  grid-column: 2;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  margin-top: 8px;
+  min-height: 46px;
+  padding: 12px 17px;
+  border-radius: 5px;
+  background: white;
+  color: #183e2c;
+  font-size: 14px;
+  font-weight: 700;
+}
+.simple-start > button:hover {
+  background: #e7eee8;
+}
+.simple-appointment {
+  background: #fff;
+  border: 1px solid #d4ddd6;
+  padding: 25px 28px;
+  display: flex;
+  flex-direction: column;
+}
+.simple-appointment header,
+.simple-requests header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.simple-appointment header > span {
+  font-size: 14px;
+  font-weight: 700;
+}
+.simple-appointment header button,
+.simple-requests header button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #365847;
+  min-height: 32px;
+}
+.simple-appointment header button:hover,
+.simple-requests header button:hover {
+  text-decoration: underline;
+}
+.simple-visit {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 25px 0;
+}
+.simple-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  min-height: 77px;
+  border: 1px solid #d6dfd6;
+  border-radius: 7px;
+  background: #f6f8f3;
+  flex-shrink: 0;
+}
+.simple-date span {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #506653;
+}
+.simple-date strong {
+  font:
+    400 34px/1.1 Georgia,
+    serif;
+  color: #183e2c;
+  margin-top: 5px;
+}
+.simple-visit h2 {
+  font-size: 22px;
+  letter-spacing: -0.6px;
+  line-height: 1.2;
+  margin: 0 0 8px;
+  color: #183e2c;
+}
+.simple-visit p {
+  font-size: 14px;
+  margin: 0 0 5px;
+  color: #253f32;
+}
+.simple-visit > div > span {
+  font-size: 12px;
+  color: #53695b;
+}
+.simple-visit-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 15px 0 0;
+  border-top: 1px solid #e0e6df;
+  margin-top: auto;
+  color: #244d37;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  min-height: 40px;
+}
+.simple-visit-action:hover {
+  text-decoration: underline;
+}
+.simple-no-visit {
+  margin: auto 0;
+  padding: 20px 0;
+  color: #52665d;
+}
+.simple-no-visit h2 {
+  font-size: 19px;
+  color: #183e2c;
+  margin: 13px 0 8px;
+}
+.simple-no-visit p {
+  font-size: 14px;
+}
+.simple-requests {
+  margin-top: 32px;
+}
+.simple-requests header {
+  margin-bottom: 16px;
+}
+.simple-requests h2 {
+  font-size: 19px;
+  letter-spacing: -0.4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #183e2c;
+  margin: 0;
+}
+.simple-requests h2 > span {
+  font-size: 11px;
+  letter-spacing: 0;
+  background: #e0e8dc;
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.simple-request-list {
+  border: 1px solid #d4ddd6;
+  border-radius: 9px;
+  background: #fff;
+  overflow: hidden;
+}
+.simple-request {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  width: 100%;
+  text-align: left;
+  padding: 21px 24px;
+  min-width: 0;
+  color: #254636;
+}
+.simple-request + .simple-request {
+  border-top: 1px solid #e1e7df;
+}
+.simple-request:hover {
+  background: #f8faf6;
+}
+.simple-request-symbol {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #edf3e9;
+  color: #446645;
+}
+.simple-request-symbol.urgent {
+  background: #fff0e8;
+  color: #8d3824;
+}
+.simple-request > div {
+  flex: 1;
+  min-width: 0;
+}
+.simple-request strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+.simple-request p {
+  font-size: 13px;
+  color: #52665d;
+  margin: 7px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 650px;
+}
+.simple-status {
+  font-size: 12px;
+  white-space: nowrap;
+  color: #31553d;
+  background: #eff4eb;
+  padding: 7px 10px;
+  border-radius: 4px;
+}
+.simple-status.urgent {
+  background: #fff0e8;
+  color: #8d3824;
+}
+.simple-status.review {
+  background: #faf3df;
+  color: #715a20;
+}
+.simple-up-to-date {
+  border-top: 1px solid #d4ddd6;
+  padding: 22px 0;
+  color: #52665d;
+  font-size: 14px;
+}
+.simple-up-to-date span {
+  font-weight: 600;
+  color: #254636;
+}
+.simple-up-to-date p {
+  display: inline;
+  margin-left: 8px;
+}
+.simple-support {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  padding: 25px 0;
+  margin-top: 7px;
+}
+.simple-support button,
+.simple-support a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #3c5b48;
+  text-decoration: none;
+  min-height: 38px;
+}
+.simple-support a {
+  margin-left: auto;
+}
+.simple-support button:hover,
+.simple-support a:hover {
+  text-decoration: underline;
+}
+.practice-portal .footer {
+  margin-top: 20px;
+  padding: 25px 0;
+  border-color: #d4ddd6;
+  gap: 18px;
+}
+.practice-portal .footer .logo {
+  display: none;
+}
+.practice-portal .footer > div {
+  gap: 18px;
+}
+.practice-portal .footer span,
+.practice-portal .footer button {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #52665d;
+}
+.practice-portal .page-heading {
+  margin: 0 0 28px;
+  align-items: center;
+}
+.practice-portal .page-heading h1 {
+  font:
+    400 36px/1.2 Georgia,
+    serif;
+  letter-spacing: -0.8px;
+  color: #173c2e;
+  margin: 0 0 9px;
+}
+.practice-portal .page-heading p {
+  font-size: 14px;
+  color: #52665d;
+}
+.practice-portal .appointment-ledger-heading {
+  display: none;
+}
+.practice-portal .appointment-ledger-note {
+  display: none;
+}
+/* The request form contains one central column; secondary preferences are optional. */
+.care-studio {
+  inset: 24px max(20px, calc((100vw - 920px) / 2));
+  height: calc(100dvh - 48px);
+  max-height: 900px;
+  border-radius: 12px;
+  font-family: 'Geist Variable', Arial, sans-serif;
+}
+.care-studio.care-studio-appointment {
+  inset: 24px max(20px, calc((100vw - 1200px) / 2));
+}
+.care-studio .journey-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.care-studio .journey-scroll {
+  width: 100%;
+  padding: 28px 48px 0;
+  flex: 1;
+  min-width: 0;
+}
+.care-studio .journey-header {
+  height: 58px;
+  padding: 0 28px;
+}
+.care-studio .journey-header-label {
+  font-size: 12px;
+}
+.care-studio .journey-demo {
+  display: none;
+}
+.care-studio .journey-kicker {
+  display: none;
+}
+.care-studio .journey-heading h2 {
+  font-size: 32px;
+  margin: 0 0 10px;
+}
+.care-studio .journey-heading p {
+  font-size: 14px;
+  margin: 0;
+}
+.care-studio .journey-heading {
+  margin-bottom: 24px;
+}
+.care-studio .journey-back {
+  margin-bottom: 18px;
+}
+.care-studio .care-progress {
+  gap: 13px;
+  padding: 16px 20px;
+}
+.care-studio .care-progress button {
+  gap: 7px;
+}
+.care-studio .care-progress button > svg {
+  margin-left: 5px;
+}
+.care-studio .care-progress strong {
+  font-size: 12px;
+}
+.care-studio .journey-panel textarea {
+  min-height: 165px;
+}
+.care-studio .journey-panel-title h3 {
+  font-size: 14px;
+}
+.care-studio .journey-panel-title {
+  padding: 16px 20px 12px;
+}
+.care-studio .journey-input-foot {
+  font-size: 11px;
+}
+.simple-goal {
+  margin-top: 18px;
+  border-bottom: 1px solid #dde4dc;
+  padding-bottom: 16px;
+}
+.simple-goal summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #3d5b49;
+  min-height: 30px;
+}
+.simple-goal .care-goal legend {
+  display: none;
+}
+.simple-goal .journey-fieldset {
+  margin: 14px 0 0;
+}
+.care-studio .journey-action-bar {
+  margin-top: 24px;
+  padding: 17px 0;
+  min-height: 78px;
+}
+.care-studio .journey-button {
+  font-size: 14px;
+  min-height: 46px;
+}
+.care-studio .journey-fieldset {
+  margin: 20px 0;
+}
+.care-studio .journey-section-heading > span {
+  display: none;
+}
+.care-studio .care-review-goal {
+  font-size: 12px;
+}
+.care-record-history summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 36px;
+  color: #365440;
+}
+.care-record-history[open] summary {
+  font-weight: 600;
+}
+@media (max-width: 800px) {
+  .practice-portal .practice-masthead {
+    padding: 18px 22px;
+    min-height: 80px;
+  }
+  .practice-portal .masthead-practice {
+    display: none;
+  }
+  .practice-portal .practice-navigation {
+    margin: 0 22px;
+    max-width: none;
+  }
+  .practice-portal .page {
+    padding: 28px 22px 0;
+  }
+  .simple-priorities {
+    gap: 16px;
+  }
+  .simple-start {
+    padding: 24px;
+    grid-template-columns: 1fr;
+  }
+  .simple-icon {
+    display: none;
+  }
+  .simple-start > button {
+    grid-column: 1;
+  }
+  .simple-start h2 {
+    font-size: 28px;
+  }
+  .simple-appointment {
+    padding: 22px;
+  }
+  .simple-visit {
+    gap: 15px;
+  }
+  .simple-visit h2 {
+    font-size: 19px;
+  }
+  .simple-support {
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .simple-support a {
+    margin-left: 0;
+  }
+  .simple-welcome > span {
+    display: none;
+  }
+  .care-studio {
+    inset: 12px;
+    height: calc(100dvh - 24px);
+  }
+  .care-studio .journey-scroll {
+    padding: 26px 28px 0;
+  }
+  .care-studio .care-progress {
+    gap: 10px;
+  }
+  .care-studio .care-progress strong {
+    font-size: 11px;
+  }
+  .care-studio .care-progress button > svg {
+    display: none;
+  }
+  .care-studio.care-studio-appointment {
+    inset: 12px;
+  }
+  .practice-portal .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .practice-portal .footer > div {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 600px) {
+  .practice-portal .practice-masthead {
+    padding: 15px 18px;
+    min-height: 74px;
+  }
+  .practice-portal .masthead-user > div,
+  .practice-portal .masthead-user > svg {
+    display: none;
+  }
+  .practice-portal .practice-brand .brand-word {
+    font-size: 32px;
+  }
+  .practice-portal .practice-brand svg {
+    width: 27px;
+    height: 27px;
+  }
+  .practice-portal .masthead-account {
+    gap: 13px;
+  }
+  .practice-portal .practice-navigation {
+    margin: 0 18px;
+    display: block;
+    min-height: 48px;
+  }
+  .practice-portal .practice-navigation nav {
+    display: flex !important;
+    gap: 22px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .practice-portal .practice-navigation nav > button {
+    font-size: 12px;
+    min-height: 46px;
+    padding: 12px 0;
+  }
+  .practice-portal .mobile-menu-button {
+    display: none;
+  }
+  .practice-portal .page {
+    padding: 26px 18px 0;
+  }
+  .simple-welcome {
+    margin-bottom: 24px;
+  }
+  .simple-welcome h1 {
+    font-size: 29px;
+  }
+  .simple-welcome p {
+    font-size: 14px;
+  }
+  .simple-priorities {
+    grid-template-columns: 1fr;
+  }
+  .simple-start {
+    min-height: 230px;
+    padding: 26px;
+    gap: 18px;
+  }
+  .simple-appointment {
+    min-height: 240px;
+  }
+  .simple-requests {
+    margin-top: 28px;
+  }
+  .simple-request {
+    padding: 18px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .simple-request-symbol {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+  .simple-request > div {
+    flex-basis: calc(100% - 75px);
+  }
+  .simple-request > svg {
+    margin-left: auto;
+  }
+  .simple-status {
+    margin-left: 46px;
+    font-size: 11px;
+  }
+  .simple-request p {
+    font-size: 12px;
+  }
+  .simple-support {
+    gap: 3px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 0;
+  }
+  .practice-portal .page-heading h1 {
+    font-size: 30px;
+  }
+  .care-studio,
+  .care-studio.care-studio-appointment {
+    inset: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+  .care-studio .journey-header {
+    padding: 0 20px;
+    height: 55px;
+  }
+  .care-studio .journey-header-label {
+    display: none;
+  }
+  .care-studio .care-progress {
+    display: none;
+  }
+  .care-studio .journey-mobile-progress {
+    display: block;
+    margin-bottom: 24px;
+  }
+  .care-studio .journey-scroll {
+    padding: 22px 20px 0;
+  }
+  .care-studio .journey-heading h2 {
+    font-size: 28px;
+  }
+  .care-studio .journey-panel-title {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .care-studio .journey-sample {
+    margin-left: 0;
+  }
+  .care-studio .duration-options {
+    flex-wrap: wrap;
+  }
+  .care-studio .duration-options button {
+    flex: 1 0 28%;
+    white-space: normal;
+  }
+  .care-studio .journey-input-foot > span:first-child {
+    max-width: 70%;
+    line-height: 1.5;
+  }
+  .care-studio .journey-action-bar {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .care-studio .journey-action-bar > span {
+    font-size: 11px;
+  }
+  .care-studio .journey-button {
+    justify-content: center;
+    flex: 1;
+  }
+  .care-studio .journey-safety {
+    padding: 18px;
+  }
+  .care-studio .severity-options {
+    gap: 8px;
+  }
+  .care-studio .severity-options > button {
+    padding: 13px 10px;
+    display: block;
+  }
+  .care-studio .severity-symbol {
+    display: none;
+  }
+  .care-studio .severity-options small {
+    font-size: 10px;
+  }
+  .care-studio .journey-two-fields {
+    grid-template-columns: 1fr;
+  }
+}
