@@ -51,6 +51,8 @@ test('support uses Mubit Haiku with content excluded from training, validated in
       },
     );
     assert.equal(payload.model, 'claude-haiku-4-5');
+    assert.match(payload.system, /requests waiting-time forecasts through Mubit/);
+    assert.match(payload.system, /Never invent a centre, distance or waiting time/);
     assert.equal(reply.intake?.symptoms, input.symptoms);
     assert.equal(reply.receipt, 'receipt-test');
     assert.ok(!JSON.stringify(payload).includes(patient.email));
@@ -177,8 +179,31 @@ test('chat routes through shared navigation, isolates patients and confirms a bo
     const stale = next.data.messages.at(-1).id;
     await post('message', { text: 'Actually I need to correct those details', id: randomUUID() });
     assert.equal((await post('route', { messageId: stale })).status, 409);
+    const urgent = await post(
+      'message',
+      {
+        text: 'I need urgent care, what is closest to w106dz and estimated wait time?',
+        id: randomUUID(),
+      },
+      'urgent-test',
+    );
+    assert.deepEqual(urgent.data.messages.at(-1).urgentCare, { postcode: 'W10 6DZ' });
+    assert.equal(urgent.data.messages.at(-1).draft, undefined);
+    const emergency = await post(
+      'message',
+      { text: 'I have chest pain, find nearest urgent care', id: randomUUID() },
+      'urgent-test',
+    );
+    assert.equal(emergency.data.messages.at(-1).urgentCare, undefined);
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
     db.close();
   }
+});
+
+test('Urgent-care search recognises waiting-time requests and keeps unrelated questions unchanged', async () => {
+  const { urgentCareSearch } = await import('../shared/support-chat');
+  assert.deepEqual(urgentCareSearch('Nearest hospital to m1 7fy?'), { postcode: 'M1 7FY' });
+  assert.deepEqual(urgentCareSearch('What is the waiting time?'), { postcode: '' });
+  assert.equal(urgentCareSearch('Can you help with my appointment?'), undefined);
 });

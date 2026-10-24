@@ -656,3 +656,212 @@
 .urgent-centre-list strong {
   overflow-wrap: anywhere;
 }
+
+.urgent-impact {
+  padding: 0;
+  margin: 24px 0;
+  border: 0;
+  min-width: 0;
+}
+.urgent-impact legend {
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 12px;
+  color: #234834;
+}
+.urgent-impact-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.urgent-impact-options label {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  padding: 13px 10px;
+  border: 1px solid #c2cfbe;
+  border-radius: 9px;
+  cursor: pointer;
+  background: #fff;
+}
+.urgent-impact-options input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: #234834;
+}
+.urgent-impact-options strong {
+  font-size: 13px;
+}
+.urgent-impact-options small {
+  grid-column: 2;
+  font-size: 10px;
+  color: #526452;
+}
+.urgent-impact-options .selected {
+  border: 2px solid #356448;
+  padding: 12px 9px;
+  background: #eef4e8;
+}
+.urgent-impact-options .selected.moderate {
+  border-color: #9f6419;
+  background: #fff4df;
+}
+.urgent-impact-options .selected.severe {
+  border-color: #b33f2a;
+  background: #fff0e9;
+}
+.practice-portal .urgent-worsening {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+.urgent-worsening input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.urgent-priority {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid #aabf9d;
+  background: #edf3e6;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 18px;
+  color: #25412c;
+}
+.urgent-priority.moderate {
+  background: #fff3df;
+  border-color: #cd9b4e;
+  color: #713d0b;
+}
+.urgent-priority > svg {
+  flex-shrink: 0;
+}
+.urgent-priority span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.urgent-priority strong {
+  display: block;
+  font-size: 25px;
+  line-height: 1.3;
+  margin: 4px 0;
+  font-weight: 800;
+}
+.practice-portal .urgent-priority p {
+  margin: 0;
+  font-size: 12px;
+  color: inherit;
+}
+.urgent-time-card.moderate {
+  background: #593b16;
+  border-color: #593b16;
+}
+.practice-portal .urgent-time-card.moderate > span,
+.practice-portal .urgent-time-card.moderate > p,
+.practice-portal .urgent-time-card.moderate footer {
+  color: #f8e5c3;
+}
+.practice-portal .urgent-priority-note {
+  font-size: 12px;
+  color: #536453;
+  line-height: 1.55;
+  margin: 14px 0 0;
+}
+.urgent-priority-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 1px;
+  margin: 20px 0 0;
+}
+.urgent-diversion.review {
+  border: 2px solid #c77c30;
+  background: #fff3e4;
+  color: #6c3a0c;
+}
+.urgent-diversion.emergency {
+  border: 2px solid #b2382c;
+  background: #fff0ed;
+  color: #932b20;
+}
+.urgent-diversion.review h2,
+.urgent-diversion.emergency h2 {
+  color: inherit;
+}
+.urgent-diversion.review .urgent-primary {
+  background: #803f10;
+}
+.urgent-diversion.emergency .urgent-primary {
+  background: #a22f24;
+}
+@media (max-width: 440px) {
+  .urgent-impact-options label {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+  .urgent-impact-options small {
+    grid-column: 1;
+  }
+}
+.urgent-results {
+  scroll-margin-top: 24px;
+}
+.urgent-results:focus {
+  outline: none;
+}
+.urgent-diversion.review,
+.urgent-diversion.emergency {
+  max-width: none;
+  padding: 28px;
+  border-radius: 10px;
+}
+.urgent-diversion .urgent-priority-label {
+  margin-bottom: 18px;
+}
+
+/* Keep impact and result context compact at both desktop and phone widths. */
+.urgent-priority {
+  padding: 12px 14px;
+  gap: 10px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+}
+.urgent-priority strong {
+  font-size: 20px;
+  margin: 2px 0;
+}
+.urgent-priority span {
+  font-size: 9px;
+  letter-spacing: 0.7px;
+}
+.urgent-impact-options label {
+  padding: 10px 8px;
+  column-gap: 7px;
+}
+.urgent-impact-options .selected {
+  padding: 9px 7px;
+}
+.practice-portal .urgent-worsening {
+  margin-top: 10px;
+}
+.practice-portal .urgent-priority-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+}
+.urgent-diversion.review,
+.urgent-diversion.emergency {
+  padding: 22px;
+}
+.urgent-results:has(.urgent-diversion) {
+  min-height: 0;
+}

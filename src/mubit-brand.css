@@ -1,0 +1,139 @@
+.mubit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #edc7ad;
+  border-radius: 7px;
+  background: #fff4e9;
+  color: #78370f;
+  font:
+    650 11px/1.3 'Geist Variable',
+    sans-serif;
+  white-space: normal;
+}
+.mubit-badge svg {
+  flex-shrink: 0;
+  color: #ba501d;
+}
+.mubit-badge.inverse {
+  background: #ffffff12;
+  color: #fff1df;
+  border-color: #ffffff38;
+}
+.mubit-badge.inverse svg {
+  color: #ffc79d;
+}
+.journey-processing > .mubit-badge {
+  margin-bottom: 10px;
+}
+.journey-heading > .mubit-badge {
+  margin-bottom: 10px;
+}
+.care-chat-header .mubit-badge {
+  margin-top: 7px;
+  font-size: 10px;
+  padding: 4px 7px;
+}
+.care-chat-message > .mubit-badge {
+  margin-top: 10px;
+  font-size: 10px;
+  padding: 4px 7px;
+}
+.urgent-heading .mubit-badge {
+  margin-top: 12px;
+}
+.urgent-empty .mubit-badge {
+  margin-bottom: 22px;
+}
+.urgent-results > .mubit-badge {
+  margin-top: 14px;
+}
+
+/* Attribution belongs in the existing hierarchy, without adding a second header. */
+.urgent-heading-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.practice-portal .urgent-heading-meta p {
+  margin: 0;
+}
+.urgent-heading-meta .mubit-badge {
+  margin: 0;
+}
+.urgent-time-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.urgent-time-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: #fff;
+}
+.urgent-time-heading .mubit-badge {
+  font-size: 10px;
+  padding: 4px 7px;
+  flex-shrink: 0;
+}
+.chat-mubit-receipt {
+  font-size: 11px;
+  font-weight: 500;
+  color: #697c6c;
+}
+.practice-portal .care-studio .journey-processing {
+  max-width: 560px;
+  margin: 18px auto;
+  padding: 0 12px;
+}
+.practice-portal .care-studio .journey-processing .processing-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+}
+.practice-portal .care-studio .journey-processing h2 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 8px 0 12px;
+}
+.practice-portal .care-studio .journey-processing > p {
+  max-width: 440px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.practice-portal .care-studio .journey-processing .processing-summary {
+  padding: 12px 14px;
+  margin: 18px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.practice-portal .care-studio .processing-summary span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.practice-portal .care-studio .journey-processing .care-processing-steps {
+  gap: 12px;
+  margin: 18px auto;
+  max-width: 330px;
+}
+@media (max-width: 600px) {
+  .practice-portal .care-studio .journey-processing h2 {
+    font-size: 27px;
+  }
+  .urgent-heading-meta {
+    gap: 8px;
+  }
+  .urgent-time-heading {
+    gap: 8px;
+  }
+}

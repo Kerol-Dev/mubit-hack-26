@@ -1,3 +1,4 @@
+import { MubitBadge } from './MubitBadge';
 import { findDepartment, type CarePreference, type Funding } from '../shared/departments';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -174,6 +175,7 @@ export function CareFlow({
     [safety, setSafety] = useState(''),
     [request, setRequest] = useState(initialRequest),
     [busy, setBusy] = useState(false),
+    [manualReview, setManualReview] = useState(false),
     [error, setError] = useState(''),
     [appointment, setAppointment] = useState<Appointment | null>(null),
     [confirmClose, setConfirmClose] = useState(false);
@@ -224,6 +226,7 @@ export function CareFlow({
     }
     setBusy(true);
     setError('');
+    setManualReview(human);
     try {
       const r = await api<CareRequest>('/requests', { input, human, carePreference });
       setRequest(r);
@@ -387,15 +390,17 @@ export function CareFlow({
                   {busy && stage < 3 ? (
                     <section className="journey-processing" role="status" aria-live="polite">
                       <div className="processing-icon">
-                        <LoaderCircle size={32} />
+                        <LoaderCircle size={26} />
                       </div>
-                      <span className="journey-kicker">FINDING YOUR NEXT STEP</span>
+                      {!manualReview && <MubitBadge label="Mubit · Care navigation" />}
+
                       <h2 ref={heading} tabIndex={-1}>
-                        Reviewing your request
+                        {manualReview ? 'Sending to your care team' : 'Finding your care options'}
                       </h2>
                       <p>
-                        We’re reviewing your description to suggest a suitable service. You’ll be
-                        able to review it before booking.
+                        {manualReview
+                          ? 'Your request is being sent for a practice team review.'
+                          : 'Mubit is checking your symptoms to suggest a suitable service. You’ll review the options before booking.'}
                       </p>
                       <div className="processing-summary">
                         <FileText size={17} />
@@ -408,7 +413,9 @@ export function CareFlow({
                         </span>
                         <span>
                           <LoaderCircle size={17} className="spin" />
-                          Waiting for your care suggestion
+                          {manualReview
+                            ? 'Sending to the practice'
+                            : 'Waiting for Mubit’s care suggestion'}
                         </span>
                         <span>
                           <CalendarDays size={17} />
@@ -741,6 +748,7 @@ export function CareFlow({
                           </button>
                           <div className="journey-heading">
                             <span className="journey-kicker">READY WHEN YOU ARE</span>
+                            <MubitBadge label="Powered by Mubit" />
                             <h2 ref={heading} tabIndex={-1}>
                               Review your request
                             </h2>
@@ -818,6 +826,9 @@ export function CareFlow({
                         <>
                           <div className="journey-heading">
                             <span className="journey-kicker">YOUR CARE OPTIONS</span>
+                            {request.decision.source === 'mubit' && (
+                              <MubitBadge label="Suggested through Mubit" />
+                            )}
                             <h2 ref={heading} tabIndex={-1}>
                               {request.status === 'urgent'
                                 ? 'Please get help now.'

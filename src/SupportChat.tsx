@@ -37,11 +37,13 @@ export function SupportChat({
   hidden,
   onRefresh,
   onAppointments,
+  onUrgentCare,
 }: {
   state: State;
   hidden: boolean;
   onRefresh: () => Promise<void>;
   onAppointments: () => void;
+  onUrgentCare: (postcode: string) => void;
 }) {
   const [open, setOpen] = useState(false),
     [conversation, setConversation] = useState<SupportConversation>({
@@ -53,7 +55,7 @@ export function SupportChat({
     [busy, setBusy] = useState(''),
     [error, setError] = useState('');
   const input = useRef<HTMLTextAreaElement>(null),
-    end = useRef<HTMLDivElement>(null),
+    thread = useRef<HTMLDivElement>(null),
     launcher = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open || loaded) return;
@@ -76,7 +78,8 @@ export function SupportChat({
     if (open && loaded) input.current?.focus();
   }, [open, loaded]);
   useEffect(() => {
-    if (open) end.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (open && thread.current)
+      thread.current.scrollTo({ top: thread.current.scrollHeight, behavior: 'instant' });
   }, [open, conversation.messages.length, busy]);
   const action = async (path: string, body: unknown, label: string) => {
     if (busy) return;
@@ -102,7 +105,7 @@ export function SupportChat({
     void action(
       '/support-chat/message',
       { text: value, id: crypto.randomUUID() },
-      'Writing a reply',
+      'Mubit is preparing your reply',
     );
   };
   const seed = (value: string) => {
@@ -146,7 +149,7 @@ export function SupportChat({
             </span>
             <div>
               <Dialog.Title>Here to help</Dialog.Title>
-              <Dialog.Description>Your Wellby care assistant</Dialog.Description>
+              <Dialog.Description>Care support · Powered by Mubit</Dialog.Description>
             </div>
             <Dialog.Close aria-label="Minimise chat">
               <X size={20} />
@@ -157,6 +160,7 @@ export function SupportChat({
             <span>General information · Demo appointments</span>
           </div>
           <div
+            ref={thread}
             className="care-chat-thread"
             role="log"
             aria-label="Conversation"
@@ -185,6 +189,15 @@ export function SupportChat({
                     <span>Ask a health question</span>
                     <ArrowUpRight size={16} />
                   </button>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      onUrgentCare('');
+                    }}
+                  >
+                    <span>Find urgent care &amp; waiting times</span>
+                    <ArrowUpRight size={16} />
+                  </button>
                   <button onClick={viewAppointments}>
                     <span>My appointments</span>
                     <CalendarDays size={16} />
@@ -198,8 +211,31 @@ export function SupportChat({
                 .some((n) => n.requestId && n.requestId === m.requestId);
               return (
                 <div className={'care-chat-message ' + m.role} key={m.id}>
-                  {m.role === 'assistant' && <span className="care-chat-speaker">Wellby</span>}
-                  <p>{m.text}</p>
+                  {m.role === 'assistant' && (
+                    <span className="care-chat-speaker">
+                      Wellby
+                      {m.receipt && <small className="chat-mubit-receipt"> · via Mubit</small>}
+                    </span>
+                  )}
+                  <ChatText text={m.text} />
+                  {m.urgentCare && (
+                    <div className="care-chat-urgent">
+                      <span className="care-chat-kicker">
+                        Nearby urgent care
+                        {m.urgentCare.postcode ? ` · ${m.urgentCare.postcode}` : ''}
+                      </span>
+                      <p>Check your concern, then see centres with a waiting-time forecast.</p>
+                      <button
+                        className="care-chat-primary"
+                        onClick={() => {
+                          setOpen(false);
+                          onUrgentCare(m.urgentCare!.postcode);
+                        }}
+                      >
+                        Find care &amp; waiting times <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  )}
                   {m.draft &&
                     !m.requestId &&
                     !conversation.messages.slice(index + 1).some((n) => n.role === 'user') && (
@@ -247,7 +283,7 @@ export function SupportChat({
                             void action(
                               '/support-chat/route',
                               { messageId: m.id },
-                              'Finding suitable care',
+                              'Mubit is finding suitable care',
                             )
                           }
                         >
@@ -280,7 +316,6 @@ export function SupportChat({
                 {busy}…
               </div>
             )}
-            <div ref={end} />
           </div>
           {error && (
             <div className="care-chat-error" role="alert">
@@ -472,6 +507,38 @@ function CareCard({
         <summary>When to get more help</summary>
         <p>{live.decision.safetyNet}</p>
       </details>
+    </div>
+  );
+}
+
+// Render only text and emphasis: model output never becomes executable HTML.
+export function ChatText({ text }: { text: string }) {
+  const inline = (line: string) =>
+    line
+      .split(/(\*\*[^*]+\*\*)/g)
+      .map((part, i) =>
+        part.startsWith('**') && part.endsWith('**') ? (
+          <strong key={i}>{part.slice(2, -2)}</strong>
+        ) : (
+          part
+        ),
+      );
+  const blocks = text.split(/\n\s*\n/).filter(Boolean);
+  return (
+    <div className="care-chat-text">
+      {blocks.map((block, i) => {
+        const lines = block.split('\n');
+        if (lines.every((line) => /^\s*(?:[-*•]|\d+[.)])\s+/.test(line))) {
+          return (
+            <ul key={i}>
+              {lines.map((line, j) => (
+                <li key={j}>{inline(line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, ''))}</li>
+              ))}
+            </ul>
+          );
+        }
+        return <p key={i}>{inline(block)}</p>;
+      })}
     </div>
   );
 }

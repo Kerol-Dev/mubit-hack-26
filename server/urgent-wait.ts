@@ -24,6 +24,8 @@ export const urgentInputSchema = z.object({
   condition: z.enum(urgentConditions),
   emergency: z.boolean(),
   adult: z.boolean(),
+  severity: z.enum(['mild', 'moderate', 'severe']).optional(),
+  worsening: z.boolean().optional(),
 });
 const rowSchema = z
   .object({
@@ -45,7 +47,9 @@ export const waitResponseSchema = z.object({
   message: z.string().min(1).max(400),
   estimates: z.array(rowSchema).max(3),
 });
-export function urgentSafety(input: Pick<UrgentInput, 'emergency' | 'adult' | 'symptoms'>) {
+export function urgentSafety(
+  input: Pick<UrgentInput, 'emergency' | 'adult' | 'symptoms' | 'severity' | 'worsening'>,
+) {
   if (input.emergency) return 'emergency';
   if (!input.adult) return 'review';
   // Conservative immediate diversion; the model adds contextual assessment, never bypasses this gate.
@@ -55,6 +59,7 @@ export function urgentSafety(input: Pick<UrgentInput, 'emergency' | 'adult' | 's
     )
   )
     return 'emergency';
+  if (input.severity === 'severe' || input.worsening) return 'review';
   if (/severe|rapidly worsening|pregnan|cannot bear weight|can't bear weight/i.test(input.symptoms))
     return 'review';
   return null;
@@ -79,10 +84,21 @@ export function forecastPayload(
   condition: string,
   features: { hour: number; weekday: number; month: number },
   ids = urgentSites.map((x) => x.id),
+  reported?: Pick<UrgentInput, 'severity' | 'worsening'>,
 ) {
   return {
     symptoms,
     reportedConcern: condition,
+    ...(reported?.severity
+      ? {
+          symptomContext: {
+            reportedSeverity: reported.severity,
+            gettingWorse: reported.worsening ?? false,
+            interpretation:
+              'Patient-reported impact, not a clinical priority score. Cohorts are not labelled by severity; do not invent a priority discount.',
+          },
+        }
+      : {}),
     arrival: { hour: features.hour, weekday: features.weekday, month: features.month },
     waitDefinition: 'arrival to first treating clinician, not triage or total visit',
     dataProvenance: 'synthetic',
@@ -223,6 +239,7 @@ export function installUrgentWait(app: express.Express, db: DatabaseSync) {
             input.condition,
             f,
             available.map((x) => x.site.id),
+            input,
           )
         : null;
       // Directory lookup works independently of forecast availability. Never invent a local wait.

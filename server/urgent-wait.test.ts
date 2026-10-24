@@ -124,3 +124,55 @@ test('Gateway calls exclude patient recording by default and never infer adapter
     else process.env.MUBIT_API_KEY = savedKey;
   }
 });
+
+test('Patient results show only available complete forecasts, preserving nearest-first order', async () => {
+  const { centresWithEstimates, urgentSites } = await import('../shared/urgent-care');
+  const row = {
+    site: urgentSites[0],
+    distanceMiles: 1,
+    available: true,
+    estimateMinutes: 50,
+    lowMinutes: 30,
+    highMinutes: 80,
+    explanation: 'Historical range',
+    historyCount: 40,
+  };
+  const farther = { ...row, site: urgentSites[1], distanceMiles: 3 };
+  assert.deepEqual(
+    centresWithEstimates([
+      { ...row, estimateMinutes: null, lowMinutes: null, highMinutes: null },
+      { ...row, available: false },
+      { ...row, highMinutes: null },
+      { ...row, estimateMinutes: NaN },
+      { ...row, lowMinutes: 90 },
+      row,
+      farther,
+    ]),
+    [row, farther],
+  );
+  assert.deepEqual(centresWithEstimates([]), []);
+});
+
+test('Reported severe or worsening symptoms replace forecasts with review; emergency takes priority', () => {
+  const base = { symptoms: 'My ankle is sore after walking.', emergency: false, adult: true };
+  assert.equal(urgentSafety({ ...base, severity: 'mild', worsening: false }), null);
+  assert.equal(urgentSafety({ ...base, severity: 'moderate' }), null);
+  assert.equal(urgentSafety({ ...base, severity: 'severe' }), 'review');
+  assert.equal(urgentSafety({ ...base, worsening: true }), 'review');
+  assert.equal(urgentSafety({ ...base, severity: 'severe', emergency: true }), 'emergency');
+  const payload = forecastPayload(
+    base.symptoms,
+    'Injury or sprain',
+    { hour: 12, weekday: 1, month: 10 },
+    ['st-marys'],
+    { severity: 'moderate', worsening: false },
+  );
+  assert.equal(payload.symptomContext?.reportedSeverity, 'moderate');
+  assert.match(payload.symptomContext!.interpretation, /not a clinical priority score/);
+  assert.ok(
+    !(
+      'symptomContext' in
+      forecastPayload(base.symptoms, 'Injury or sprain', { hour: 12, weekday: 1, month: 10 })
+    ),
+  );
+});

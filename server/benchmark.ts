@@ -330,12 +330,10 @@ export function installBenchmark(app: Express, db: DatabaseSync) {
     if (
       rows.some((r) => run.results.some((old) => old.side === 'adapter' && old.caseId === r.caseId))
     )
-      return res
-        .status(409)
-        .json({
-          error:
-            'An adapter result already exists for one of these cases. Create a new comparison to keep versions separate.',
-        });
+      return res.status(409).json({
+        error:
+          'An adapter result already exists for one of these cases. Create a new comparison to keep versions separate.',
+      });
     const versions = new Set(
       [...run.results.filter((r) => r.side === 'adapter'), ...rows].map((r) => r.adapterVersion),
     );

@@ -1,27 +1,29 @@
-# Wellby submission
+# Wellby final demo package
 
-- [Watch the full product demo](Wellby-demo-1080p.mp4): 93 seconds, 1920 × 1080, 30 fps, H.264 + AAC. Female narration, captions and quiet background music.
-- [PDF deck](Wellby-deck.pdf): nine slides, including the NHS urgent-care waiting-time journey.
+- [Product video](Wellby-demo-1080p.mp4): 97 seconds, 1920 x 1080, 30 fps, H.264 + AAC. Female narration, matching captions and quiet background music.
+- [PDF deck](Wellby-deck.pdf): nine slides matched to the final video. Mubit-powered care routing, Ask Wellby chat and urgent-care waiting-time forecasts.
 
-## Video chapters
+## Chapters
 
-| Time      | Journey                                              |
-| --------- | ---------------------------------------------------- |
-| 00:00     | Current patient home                                 |
-| 00:07     | Symptom intake and context                           |
-| 00:21     | Care pathway                                         |
-| 00:25     | Appointment selection and confirmation               |
-| 00:35     | Ask Wellby                                           |
-| **00:43** | **Nearest NHS urgent care: concern and postcode**    |
-| **00:53** | **Recorded 55–110 minute result and nearby centres** |
-| 01:03     | Mubit learning workflow                              |
-| 01:11     | Matched direct-provider and gateway comparison       |
-| 01:25     | Full-product closing                                 |
+| Time  | Journey                                  |
+| ----- | ---------------------------------------- |
+| 00:00 | Patient home                             |
+| 00:07 | Guided symptom intake                    |
+| 00:20 | Finding care options, powered by Mubit   |
+| 00:25 | Suggested pathway                        |
+| 00:29 | Appointment selection and confirmation   |
+| 00:38 | Ask Wellby chat, powered by Mubit        |
+| 00:47 | Nearby NHS urgent care                   |
+| 00:53 | Waiting-time forecasts, powered by Mubit |
+| 01:03 | Severe symptoms switch to urgent advice  |
+| 01:07 | Mubit learning workflow                  |
+| 01:15 | Illustrative team-preview comparison     |
+| 01:29 | Closing                                  |
 
 ## Evidence and production
 
-The home uses the actual patient-home component and application styles. Other scenes replay the workflow using deterministic UI state; comparison progress replays saved response receipts rather than making new calls during rendering. Values are recorded measurements, not invented improvements. The urgent-care result comes from the existing synthetic-data demonstration, not a live NHS feed. A gateway response does not establish adapter serving.
+The video uses deterministic workflow playback. The comparison is explicitly an illustrative team preview; its accuracy, speed and cost figures are not measured results or evidence of current adapter performance. A Mubit gateway response alone does not prove adapter serving. Patients, appointments and historical encounters are fictional. Waiting times are not a live NHS feed.
 
-All 2,790 encoded frames were checked for cursor visibility; frame borders, headings and the booking panel were checked for the previously reported flashing. The two verification files contain the results. Patients and appointment availability are fictional. Directory locations are sourced separately in `data/uk-services`.
+The routing sentence is one continuous take. Chat and urgent-care narration retain the same female voice and explicit Mubit attribution. Captions match the spoken words. All 2,910 encoded frames were checked for cursor visibility and the booking panel for flashing.
 
-Editable rendering materials remain in the local ignored `artifacts/demo-video/v11-current-product` directory. The repository includes the finished submission assets, not thousands of intermediate frames.
+Final editable audio/caption assembly: `artifacts/demo-video/v19-final`. Video frames: `artifacts/demo-video/v17-moving-loading`. PDF source: `tmp/pdfs/build_final_deck.py`. Previous versions remain in the local artifact folders.

@@ -1,50 +1,29 @@
-# Wellby demo film — proposed production plan
+# Wellby final product video
 
-**Recommendation:** a 105-second, 16:9 product walkthrough, with a 90-second cut if the submission limit requires it. Confirm the organiser's maximum duration and file-size limit before rendering. This document is a storyboard, not a claim that a video has been produced.
+The final package is in [`demo/`](../demo/README.md): a 97-second, 1920 x 1080, 30 fps MP4 and a matching nine-slide PDF deck.
 
-The film follows one fictional patient's journey from concern to confirmed demo appointment, then shows the repeatable task and measured Mubit evidence. Approximately 80% actual screen footage and 20% typography, transitions and a simple system diagram.
+## Story and narration
 
-## Timeline
+The video follows a fictional patient through symptom intake, Mubit-powered care routing, appointment booking, Ask Wellby chat and nearby NHS urgent-care waiting times. It then shows the learning workflow and an illustrative team comparison.
 
-| Time     | Actual footage / visual                                                   | Story beat                                                                                                          |
-| -------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 0–8 s    | Tight product crop, brief title over a cream background                   | “Finding the right care starts before the appointment.” Introduce Wellby.                                           |
-| 8–32 s   | Real symptom entry, relevant health details and reviewed summary          | Follow one fictional patient. Keep enough context to see each actual action.                                        |
-| 32–49 s  | Actual route, available clinician/time, confirmation and appointment list | Show a complete successful journey. The confirmation must come from the server.                                     |
-| 49–63 s  | Open Ask Wellby, show a genuine reply and care-summary card               | Conversational access to the same care-navigation flow. Keep the non-medical-advice notice legible.                 |
-| 63–79 s  | A simple animated diagram alongside actual learning UI                    | Historical-style examples → retained examples → task adapter → automatic routing when eligible. Distinguish stages. |
-| 79–97 s  | Actual matched endpoint results and dated Mubit evidence                  | Show measured agreement, time and reported cost availability. Explain the current status accurately.                |
-| 97–105 s | Return to the confirmed appointment, then understated logo/title          | “Wellby. A clearer next step.” Brief fictional-demo caption and repository link.                                    |
+The British female voice explicitly identifies Mubit in each AI action. The routing sentence is: “Now it's finding your care options, powered by Mubit, and connecting you to available appointments.” Chat and urgent-care forecasts have their own Mubit narration. Captions follow the spoken wording.
 
-## Art direction
+See the [chapter timings](../demo/README.md#chapters). The PDF uses screenshots from the same final video and includes a dedicated slide covering all three Mubit-powered actions.
 
-- Keep the application's forest green, cream, white and restrained brass palette.
-- Full-size UI with intentional crops; avoid unreadable whole-desktop recordings and floating 3D browser mockups.
-- Gentle push-ins to the symptom field, route decision and confirmation. Use clean cuts when changing context.
-- Small cursor emphasis only when needed. Avoid frantic cursor movement, exaggerated click rings and decorative charts.
-- Titles are short and editorial. The UI carries the story.
-- Preserve source recordings. Any time-compressed wait is visibly marked; never use an edited sequence as evidence of measured latency.
+## Production
 
-## Voice, music and captions
+The workflow is deterministic UI playback, using the product's components and styles. A framed screen, smooth cursor movement and a continuously filling loading bar keep the demonstration legible. Loading lasts 5.3 seconds. The scene duration is editorial and is not a latency measurement.
 
-- Warm, composed British-English narration, roughly 190–210 words for this runtime. A natural human voice or a carefully directed licensed synthetic voice is suitable.
-- Quiet instrumental bed with no vocals. Soft texture and restrained rhythm, with music ducked beneath speech.
-- Captions throughout, limited to two readable lines. Sentence-based emphasis, not bouncing word-by-word captions. Keep captions away from inputs, route cards and booking controls.
-- Use licensed audio and retain the source/licence details with the production files.
+Female narration, quiet background music and captions are retained. Final export uses H.264 video, AAC audio and fast-start metadata. All 2,910 encoded frames were checked for cursor visibility, with additional checks for the previously reported booking-panel flashing.
 
-## Evidence rules
+## Evidence boundaries
 
-- Record the running application using fictional details. Do not simulate an AI response, appointment write or loading completion in an animation tool.
-- Mubit gateway traffic is not automatically adapter traffic. Only describe a response as adapter-served when independently supported by the serving evidence.
-- Use the actual latest quality score, case count and date. Do not imply an unachieved 90% score.
-- Cost savings require comparable reported costs; otherwise say “cost not reported” or omit the savings claim.
-- Explain that expected routes are illustrative synthetic labels, not clinical validation.
-- If the adapter is still below its gate at recording time, show the implemented workflow and genuine training progress. Frame future benefits as goals.
+- Comparison figures in this team-preview video and deck are illustrative, not measured results or claims about current adapter performance.
+- The website retains its separate recorded results and response receipts. The video edit does not change them.
+- Mubit gateway traffic alone does not prove a trained adapter served a response.
+- Patients, bookings and historical encounters are fictional. Waiting-time forecasts are not a live NHS feed.
+- Model evaluation cases remain separate from training.
 
-## Production and export
+## Editable source
 
-Capture real workflows first, then edit the strongest takes. Record or generate the narration after timings are locked. Use Remotion or a conventional editor for typography, controlled crops, captions, music and final compositing; do not rebuild the application as a fake animated UI.
-
-Recommended delivery: `wellby-demo.mp4`, 1920×1080, 30 fps, H.264, AAC stereo at 48 kHz, web-friendly fast-start metadata. An 8–12 Mbps video rate is a practical starting point, then adapt to the actual upload limit. Keep a caption sidecar (`.srt`) and a clean high-quality master as well as burned-in captions in the submission copy.
-
-References: [Remotion documentation](https://www.remotion.dev/docs/), [MP4 encoding guidance](https://support.google.com/youtube/answer/1722171?hl=en). These are production references, not the hackathon's submission rules.
+Local rendering and audio sources are in `artifacts/demo-video/v19-final`, using the frames in `v17-moving-loading`. PDF authoring is in `tmp/pdfs/build_final_deck.py`. These intermediate directories are ignored; the finished video, deck and verification files are included in the repository.

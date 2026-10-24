@@ -285,7 +285,8 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
     [details, setDetails] = useState<CareRequest | null>(null),
     [appointment, setAppointment] = useState<Appointment | null>(null),
     [error, setError] = useState(''),
-    [mobile, setMobile] = useState(false);
+    [mobile, setMobile] = useState(false),
+    [urgentPostcode, setUrgentPostcode] = useState('');
   const refresh = async () => {
     try {
       setState(await api('/state'));
@@ -409,7 +410,7 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
           ) : (
             <>
               {view === 'urgent-care' ? (
-                <UrgentCare onBack={() => go('home')} />
+                <UrgentCare initialPostcode={urgentPostcode} onBack={() => go('home')} />
               ) : view === 'home' ? (
                 <PracticeHome
                   state={state}
@@ -506,6 +507,10 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
           hidden={view === 'staff' || !!flow || !!appointment || !!details || help}
           onRefresh={refresh}
           onAppointments={() => go('appointments')}
+          onUrgentCare={(postcode) => {
+            setUrgentPostcode(postcode);
+            go('urgent-care');
+          }}
         />
       )}
       {state && flow && (

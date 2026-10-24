@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { MubitBadge } from './MubitBadge';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,20 +12,45 @@ import {
   ChevronDown,
   AlertCircle,
 } from 'lucide-react';
-import { urgentConditions, type UrgentInput, type UrgentResult } from '../shared/urgent-care';
+import {
+  centresWithEstimates,
+  urgentConditions,
+  type UrgentInput,
+  type UrgentResult,
+} from '../shared/urgent-care';
 import './urgent-care.css';
 export const urgentDemoConcern =
   'I twisted my ankle stepping off a kerb this morning. It is swollen and painful to walk on, but I can put some weight on it. There is no open wound or numbness.';
-export function UrgentCare({ onBack }: { onBack: () => void }) {
+export function UrgentCare({
+  onBack,
+  initialPostcode = '',
+}: {
+  onBack: () => void;
+  initialPostcode?: string;
+}) {
   const [symptoms, setSymptoms] = useState(''),
-    [postcode, setPostcode] = useState(''),
+    [postcode, setPostcode] = useState(initialPostcode),
     [condition, setCondition] = useState<UrgentInput['condition']>('Injury or sprain'),
     [screen, setScreen] = useState<'none' | 'emergency' | ''>(''),
     [adult, setAdult] = useState(true),
+    [severity, setSeverity] = useState<NonNullable<UrgentInput['severity']> | ''>(''),
+    [worsening, setWorsening] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [result, setResult] = useState<UrgentResult | null>(null),
     [selected, setSelected] = useState('');
+  const resultsPanel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (busy || result) {
+      resultsPanel.current?.focus({ preventScroll: true });
+      resultsPanel.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  }, [busy, result]);
+  useEffect(() => {
+    setPostcode(initialPostcode);
+    setResult(null);
+    setSelected('');
+  }, [initialPostcode]);
   const reset = () => {
     setResult(null);
     setError('');
@@ -45,19 +71,24 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
           condition,
           emergency: screen === 'emergency',
           adult,
+          severity,
+          worsening,
         }),
       });
       const data = await r.json();
       if (!r.ok) throw Error(data.error || 'Please try again.');
       setResult(data);
-      setSelected(data.results?.[0]?.site.id || '');
+      setSelected(centresWithEstimates(data.results || [])[0]?.site.id || '');
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   }
-  const chosen = result?.results.find((x) => x.site.id === selected) || result?.results[0];
+  const estimatedCentres = centresWithEstimates(result?.results || []);
+  const chosen = estimatedCentres.find((x) => x.site.id === selected) || estimatedCentres[0];
+  const noEstimates =
+    result && (result.status === 'estimate' || result.status === 'directory') && !chosen;
   return (
     <div className="urgent-page">
       <button className="urgent-back" onClick={onBack}>
@@ -69,7 +100,10 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
             CARE WITHOUT THE GUESSWORK <b>Demo</b>
           </span>
           <h1>Urgent care, near you.</h1>
-          <p>Find a nearby NHS centre. Know what to expect.</p>
+          <div className="urgent-heading-meta">
+            <p>Find a nearby NHS centre. Know what to expect.</p>
+            <MubitBadge label="Powered by Mubit" />
+          </div>
         </div>
         <span className="urgent-heading-icon">
           <Clock3 size={32} />
@@ -108,6 +142,8 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
                   setCondition('Injury or sprain');
                   setScreen('none');
                   setAdult(true);
+                  setSeverity('moderate');
+                  setWorsening(false);
                   reset();
                 }}
               >
@@ -143,6 +179,45 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
                   />
                 </label>
               </div>
+              <fieldset className="urgent-impact">
+                <legend>How much is it affecting you?</legend>
+                <div className="urgent-impact-options">
+                  {(['mild', 'moderate', 'severe'] as const).map((level) => (
+                    <label key={level} className={severity === level ? 'selected ' + level : ''}>
+                      <input
+                        type="radio"
+                        name="urgent-impact"
+                        value={level}
+                        checked={severity === level}
+                        required
+                        onChange={() => {
+                          setSeverity(level);
+                          reset();
+                        }}
+                      />
+                      <strong>{level[0].toUpperCase() + level.slice(1)}</strong>
+                      <small>
+                        {level === 'mild'
+                          ? 'Manageable'
+                          : level === 'moderate'
+                            ? 'Affecting my day'
+                            : 'Hard to cope'}
+                      </small>
+                    </label>
+                  ))}
+                </div>
+                <label className="urgent-worsening">
+                  <input
+                    type="checkbox"
+                    checked={worsening}
+                    onChange={(e) => {
+                      setWorsening(e.target.checked);
+                      reset();
+                    }}
+                  />{' '}
+                  My symptoms are getting worse
+                </label>
+              </fieldset>
               <fieldset className="urgent-safety">
                 <legend>Before we continue</legend>
                 <p>
@@ -198,14 +273,21 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
                     />{' '}
                     This request is for someone aged 18 or over
                   </label>
-                  <button className="urgent-primary" disabled={busy || !screen} type="submit">
+                  <button
+                    className="urgent-primary"
+                    disabled={busy || !screen || !severity}
+                    type="submit"
+                  >
                     {busy ? (
                       <>
-                        <LoaderCircle className="spin" size={20} /> Checking nearby centres…
+                        <LoaderCircle className="spin" size={20} /> Preparing your Mubit forecast…
                       </>
                     ) : (
                       <>
-                        Find care & waiting times <ArrowRight size={20} />
+                        {severity === 'severe' || worsening
+                          ? 'Get urgent guidance'
+                          : 'Find care & waiting times'}{' '}
+                        <ArrowRight size={20} />
                       </>
                     )}
                   </button>
@@ -226,11 +308,12 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
               UK postcode search uses a sourced directory of emergency and urgent-care services,
               ordered by straight-line distance. Opening hours and service availability need
               checking with the centre. Forecasts are currently supported for three West London
-              centres; other locations show no invented wait. Waits are model estimates from
-              synthetic historical encounters, not live NHS queue data or medical advice. Time means
-              arrival to first treating clinician, not total visit time. Clinical priority can
-              change the wait. Postcodes are looked up through postcodes.io; only concern and coarse
-              arrival context go to Mubit. Model responses are not added to training.
+              centres. Only centres with an available forecast appear in these results. Waits are
+              model estimates from synthetic historical encounters, not live NHS queue data or
+              medical advice. Time means arrival to first treating clinician, not total visit time.
+              Clinical priority can change the wait. Postcodes are looked up through postcodes.io;
+              only concern and coarse arrival context go to Mubit. Model responses are not added to
+              training.
             </p>
             <a
               href="https://www.nhs.uk/nhs-services/urgent-and-emergency-care-services/when-to-visit-an-urgent-treatment-centre/"
@@ -264,20 +347,41 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
             )}
           </details>
         </section>
-        <section className="urgent-results" aria-live="polite" aria-busy={busy}>
+        <section
+          ref={resultsPanel}
+          tabIndex={-1}
+          className="urgent-results"
+          aria-label="Waiting-time result"
+          aria-live="polite"
+          aria-busy={busy}
+        >
           {busy ? (
             <div className="urgent-empty">
               <div className="urgent-orbit">
                 <LoaderCircle size={34} className="spin" />
               </div>
-              <h2>Finding your next step.</h2>
-              <p>Looking at location, arrival time and similar visits.</p>
+              <MubitBadge label="Mubit · Waiting-time AI" />
+              <h2>Preparing your forecast.</h2>
+              <p>
+                Checking your concern and finding supported centres. Mubit uses arrival context and
+                historical visits for the forecast.
+              </p>
             </div>
           ) : chosen && (result?.status === 'estimate' || result?.status === 'directory') ? (
             <>
+              <div className={'urgent-priority ' + (severity || 'mild')}>
+                <AlertCircle size={24} />
+                <div>
+                  <span>YOUR REPORTED SYMPTOMS</span>
+                  <strong>{severity === 'moderate' ? 'Moderate impact' : 'Mild impact'}</strong>
+                  <p>
+                    {condition} · {worsening ? 'Getting worse' : 'Not getting worse'}
+                  </p>
+                </div>
+              </div>
               <div className="urgent-result-label">
                 <span>
-                  <MapPin size={15} /> Nearby services
+                  <MapPin size={15} /> Centres with waiting times
                 </span>
                 <small>
                   {new Date(result.createdAt).toLocaleTimeString('en-GB', {
@@ -288,7 +392,7 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
                 </small>
               </div>
               <div className="urgent-centre-list">
-                {result.results.map((x, i) => (
+                {estimatedCentres.map((x, i) => (
                   <button
                     key={x.site.id}
                     onClick={() => setSelected(x.site.id)}
@@ -300,65 +404,35 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
                       <small>{x.distanceMiles.toFixed(1)} miles away</small>
                     </span>
                     <span className="urgent-small-wait">
-                      {x.lowMinutes !== null ? (
-                        <>
-                          {x.lowMinutes}–{x.highMinutes}
-                          <small>min</small>
-                        </>
-                      ) : (
-                        <small>
-                          Wait not
-                          <br />
-                          published
-                        </small>
-                      )}
+                      {x.lowMinutes}–{x.highMinutes}
+                      <small>min</small>
                     </span>
                   </button>
                 ))}
               </div>
-              {chosen.lowMinutes !== null ? (
-                <div className="urgent-time-card">
+              <div className={'urgent-time-card ' + (severity || 'mild')}>
+                <div className="urgent-time-heading">
                   <span>
                     <Clock3 size={17} /> Expected wait
                   </span>
-                  <div>
-                    <strong>
-                      {chosen.lowMinutes}–{chosen.highMinutes}
-                    </strong>
-                    <span>min</span>
-                  </div>
-                  <p>At {chosen.site.name}</p>
-                  <footer>
-                    <span>{chosen.site.hours}</span>
-                    <ShieldCheck size={18} />
-                  </footer>
+                  {result.receipt && <MubitBadge inverse label="Via Mubit" />}
                 </div>
-              ) : (
-                <div className="urgent-directory-card">
-                  <span>
-                    <MapPin size={18} />{' '}
-                    {chosen.site.kind === 'urgent' ? 'Urgent care service' : 'Emergency department'}
-                  </span>
-                  <h2>{chosen.site.name}</h2>
-                  <p>
-                    {chosen.site.address}
-                    <br />
-                    {chosen.site.postcode}
-                  </p>
-                  <strong>Wait not published</strong>
-                  <small>Check opening hours and access with the centre.</small>
-                  <a
-                    href={
-                      'https://www.google.com/maps/search/?api=1&query=' +
-                      encodeURIComponent(chosen.site.name + ' ' + chosen.site.postcode)
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    View on map <ArrowUpRight size={16} />
-                  </a>
+                <div>
+                  <strong>
+                    {chosen.lowMinutes}–{chosen.highMinutes}
+                  </strong>
+                  <span>min</span>
                 </div>
-              )}
+                <p>At {chosen.site.name}</p>
+                <footer>
+                  <span>{chosen.site.hours}</span>
+                  <ShieldCheck size={18} />
+                </footer>
+              </div>
+              <p className="urgent-priority-note">
+                The clinical team prioritises care. Reported impact does not guarantee a shorter
+                wait.
+              </p>
               <div className="urgent-next">
                 <h3>Your next step</h3>
                 <p>
@@ -385,21 +459,43 @@ export function UrgentCare({ onBack }: { onBack: () => void }) {
               </div>
             </>
           ) : result ? (
-            <div className="urgent-empty urgent-diversion">
+            <div className={'urgent-empty urgent-diversion ' + result.status}>
               <AlertCircle size={34} />
+              {(result.status === 'review' || result.status === 'emergency') && (
+                <span className="urgent-priority-label">
+                  {result.status === 'emergency'
+                    ? 'EMERGENCY · ACT NOW'
+                    : 'URGENT ASSESSMENT NEEDED'}
+                </span>
+              )}
               <h2>
-                {result.status === 'emergency'
-                  ? 'Get emergency help now.'
-                  : result.status === 'outside-area'
-                    ? 'Find your local service.'
-                    : 'Let’s get you the right help.'}
+                {noEstimates
+                  ? 'No nearby waiting times available.'
+                  : result.status === 'emergency'
+                    ? 'Get emergency help now.'
+                    : result.status === 'outside-area'
+                      ? 'Find your local service.'
+                      : result.status === 'review'
+                        ? 'Get advice now. Don’t wait for a forecast.'
+                        : 'Let’s get you the right help.'}
               </h2>
-              <p>{result.message}</p>
+              {result.receipt && <MubitBadge label="Request checked through Mubit" />}
+              <p>
+                {noEstimates
+                  ? 'We only show centres with an available waiting-time estimate. You can still find local care through the service below.'
+                  : result.message}
+              </p>
               <a
                 className="urgent-primary"
-                href={result.status === 'emergency' ? 'tel:999' : 'https://111.nhs.uk/'}
+                href={
+                  result.status === 'emergency'
+                    ? 'tel:999'
+                    : result.help?.url || 'https://111.nhs.uk/'
+                }
               >
-                {result.status === 'emergency' ? 'Call 999' : 'Get help from NHS 111'}
+                {result.status === 'emergency'
+                  ? 'Call 999'
+                  : result.help?.label || 'Get help from NHS 111'}
                 <ArrowUpRight size={18} />
               </a>
             </div>

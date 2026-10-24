@@ -114,8 +114,8 @@ This is a locally hosted hackathon application. Sign-in separates demo accounts,
 
 ## Demo and credits
 
-- [93-second full-product demo and PDF deck](demo/README.md)
-- [Original product-film storyboard](docs/DEMO_VIDEO.md)
+- [97-second final product video and PDF deck](demo/README.md)
+- [Video chapters and production notes](docs/DEMO_VIDEO.md)
 - [Architecture and Mubit integration](docs/ARCHITECTURE.md)
 - [Stock-photography credits](public/photo-credits.txt). Portraits illustrate fictional identities and do not imply endorsement.
 - [Mubit: first adapter](https://docs.mubit.ai/guides/first-adapter)
@@ -125,4 +125,4 @@ Built with React, TypeScript, Vite, Express, SQLite, Radix UI and Lucide.
 
 ## Urgent care waiting times
 
-The patient home includes a UK postcode urgent-care finder with sourced service locations in all four nations. Mubit waiting-time forecasts are available for the three centres covered by the historical cohort; other locations show service information without inventing a wait. See [setup, data and verified results](docs/URGENT-CARE.md). The dedicated task has 500 recorded calls awaiting Mubit review; 100 evaluation cases remain separate. **Practice workspace → Urgent care** displays training progress, held-out evaluation metrics, request receipts and explicit test controls.
+The patient home includes a UK postcode urgent-care finder with sourced service locations in all four nations. Mubit waiting-time forecasts are available for the three centres covered by the historical cohort. The results list shows only centres with complete forecasts. Severe or worsening symptoms switch to urgent advice. See [setup, data and verified results](docs/URGENT-CARE.md). The dedicated task has 500 recorded calls awaiting Mubit review; 100 evaluation cases remain separate. **Practice workspace → Urgent care** displays training progress, held-out evaluation metrics, request receipts and explicit test controls.

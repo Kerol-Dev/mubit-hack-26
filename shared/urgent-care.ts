@@ -12,6 +12,8 @@ export type UrgentInput = {
   condition: UrgentCondition;
   emergency: boolean;
   adult: boolean;
+  severity?: 'mild' | 'moderate' | 'severe';
+  worsening?: boolean;
 };
 export type UrgentSite = {
   id: string;
@@ -98,3 +100,21 @@ export type UrgentResult = {
   };
   dataLabel: string;
 };
+
+export function centresWithEstimates(results: WaitEstimate[]): WaitEstimate[] {
+  return results.filter(
+    (x) =>
+      x.available !== false &&
+      typeof x.estimateMinutes === 'number' &&
+      Number.isFinite(x.estimateMinutes) &&
+      typeof x.lowMinutes === 'number' &&
+      Number.isFinite(x.lowMinutes) &&
+      typeof x.highMinutes === 'number' &&
+      Number.isFinite(x.highMinutes) &&
+      x.lowMinutes >= 5 &&
+      x.lowMinutes <= x.estimateMinutes &&
+      x.estimateMinutes <= x.highMinutes &&
+      x.highMinutes <= 360 &&
+      x.highMinutes - x.lowMinutes >= 20,
+  );
+}

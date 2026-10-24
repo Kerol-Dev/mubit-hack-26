@@ -516,3 +516,87 @@
     transform: none;
   }
 }
+
+/* Keep the conversation inside the popup, including at narrow widths and zoom. */
+.care-chat {
+  width: min(440px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  min-width: 0;
+  box-sizing: border-box;
+}
+.care-chat *,
+.care-chat *::before,
+.care-chat *::after {
+  box-sizing: border-box;
+}
+.care-chat-header h2 {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.care-chat-notice,
+.care-chat-footer,
+.care-chat-error {
+  flex-shrink: 0;
+}
+.care-chat-thread {
+  min-width: 0;
+  overflow-x: hidden;
+  padding: 20px 22px;
+  scroll-padding-block: 20px;
+}
+.care-chat-message {
+  min-width: 0;
+  max-width: 100%;
+}
+.care-chat-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+.care-chat-text p {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+}
+.care-chat-text ul {
+  padding: 0 0 0 20px;
+  margin: 0 0 12px;
+  list-style: disc;
+}
+.care-chat-text li {
+  padding-left: 2px;
+  margin: 0 0 7px;
+}
+.care-chat-text > :last-child {
+  margin-bottom: 0;
+}
+.care-chat-urgent {
+  background: #f3f6ee;
+  border: 1px solid #d4dfca;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+}
+.care-chat-urgent p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  color: #48604e;
+}
+.care-chat-primary svg {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .care-chat {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+  .care-chat-thread {
+    padding: 18px;
+  }
+}

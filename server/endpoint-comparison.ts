@@ -253,25 +253,21 @@ export function installEndpointComparison(app: Express, db: DatabaseSync) {
     };
     for (const s of sides)
       if (!keys[s])
-        return res
-          .status(409)
-          .json({
-            error:
-              s === 'openai'
-                ? `Add a direct ${usesAnthropic(run.model) ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'} to the server .env file first.`
-                : 'MUBIT_API_KEY is missing.',
-          });
+        return res.status(409).json({
+          error:
+            s === 'openai'
+              ? `Add a direct ${usesAnthropic(run.model) ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'} to the server .env file first.`
+              : 'MUBIT_API_KEY is missing.',
+        });
     // Choose case IDs first so both endpoints receive exactly the same cases.
     const pending = cases
       .filter((c) => sides.some((s) => !run.results.some((r) => r.side === s && r.caseId === c.id)))
       .slice(0, p.count);
     if (!pending.length)
-      return res
-        .status(409)
-        .json({
-          error:
-            'No unattempted cases remain for this selection. Create a new comparison to repeat them.',
-        });
+      return res.status(409).json({
+        error:
+          'No unattempted cases remain for this selection. Create a new comparison to repeat them.',
+      });
     const abort = new AbortController();
     active = { id: run.id, abort };
     run.status = 'running';
