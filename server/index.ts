@@ -1,5 +1,15 @@
+import { installUrgentWorkspace } from './urgent-workspace';
+import { installUrgentWait } from './urgent-wait';
+import {
+  preferenceSchema,
+  applyCarePreference,
+  clinicianFunding,
+  consultationFee,
+} from './care-options';
+import type { CarePreference } from '../shared/departments';
 import { installSupportChat } from './support-chat';
 import { expandedTraining } from './training-expansion';
+import { training500 } from './training-500';
 import { installBenchmark } from './benchmark';
 import { installEndpointComparison } from './endpoint-comparison';
 import 'dotenv/config';
@@ -10,7 +20,13 @@ import { mkdirSync } from 'node:fs';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
 import { clinicians, patient, practice, history } from './data';
-import { navigate, intakeSchema, taskName, instructions } from './navigation';
+import {
+  navigate,
+  navigatePatientRequest,
+  intakeSchema,
+  taskName,
+  instructions,
+} from './navigation';
 import { services } from '../shared/types';
 import type {
   CareRequest,
@@ -133,7 +149,10 @@ if (!get('system', 'seed')) {
   };
   put('request', req);
   if (s) {
+    const provider = clinicians.find((c) => c.id === s.clinicianId);
     const b: Booking = {
+      funding: clinicianFunding(provider),
+      feeGbp: consultationFee(provider),
       id: 'WB-A1001',
       requestId: req.id,
       slotId: s.id,
@@ -159,6 +178,8 @@ app.use('/api', (_req, res, next) => {
   next();
 });
 installAuth(app, db);
+installUrgentWait(app, db);
+installUrgentWorkspace(app);
 installBenchmark(app, db);
 installEndpointComparison(app, db);
 const owns = (r: CareRequest | undefined, res: express.Response) =>
@@ -177,7 +198,7 @@ app.get('/api/state', (_req, res) => {
     configured: !!process.env.MUBIT_API_KEY,
     model: process.env.MUBIT_MODEL || 'claude-haiku-4-5',
     training: {
-      available: 100 + expandedTraining.length,
+      available: 100 + expandedTraining.length + training500.length,
       recorded: records.length,
       evalAvailable: 20,
       jobs: read<TrainingJob>('job').sort((a, b) => b.startedAt.localeCompare(a.startedAt)),
@@ -186,11 +207,11 @@ app.get('/api/state', (_req, res) => {
       consoleSnapshot:
         process.env.MUBIT_SHOW_DEMO_TRAINING_SNAPSHOT === 'true'
           ? {
-              checkedAt: '2026-10-24T11:41:20Z',
-              kept: 94,
+              checkedAt: '2026-10-24T12:20:31Z',
+              kept: 181,
               waiting: null,
               training:
-                'v1: 77.8% on 18 cases. 95 new calls sent for review; 3 over today’s review limit.',
+                'v1: 77.8% on 18 fixed test cases. 87 additional examples accepted; 8 rejected. Refresh policy: every 24 hours with 25 new accepted examples. v2 not yet verified.',
               serving: 'Not live; no linked request route',
             }
           : undefined,
@@ -204,7 +225,12 @@ app.get('/api/state', (_req, res) => {
     },
   });
 });
-async function createCareRequest(input: Intake, patientId: string, human = false) {
+async function createCareRequest(
+  input: Intake,
+  patientId: string,
+  human = false,
+  carePreference?: CarePreference,
+) {
   let decision: Decision;
   if (human)
     decision = {
@@ -216,7 +242,7 @@ async function createCareRequest(input: Intake, patientId: string, human = false
       needsReview: true,
       source: 'unavailable',
     };
-  else decision = await navigate(input);
+  else decision = await navigatePatientRequest(input);
   // An explicit emergency must not be bypassed by choosing human review.
   if (input.redFlags.length)
     decision = {
@@ -228,7 +254,9 @@ async function createCareRequest(input: Intake, patientId: string, human = false
       needsReview: true,
       source: 'safety',
     };
+  decision = applyCarePreference(decision, carePreference);
   const r: CareRequest = {
+    carePreference,
     patientId,
     id: 'WB-' + randomUUID().slice(0, 8).toUpperCase(),
     createdAt: new Date().toISOString(),
@@ -263,6 +291,7 @@ app.post('/api/requests', async (req, res) =>
         intakeSchema.parse(req.body.input),
         res.locals.user.id,
         req.body.human === true,
+        req.body.carePreference ? preferenceSchema.parse(req.body.carePreference) : undefined,
       ),
     ),
 );
@@ -277,6 +306,7 @@ app.get('/api/slots', (req, res) => {
     .object({
       requestId: z.string(),
       clinician: z.string().optional(),
+      funding: z.enum(['NHS', 'Private']).optional(),
       mode: z.string().optional(),
     })
     .parse(req.query);
@@ -288,6 +318,8 @@ app.get('/api/slots', (req, res) => {
       .filter(
         (s) =>
           s.route === r.decision.route &&
+          clinicianFunding(clinicians.find((c) => c.id === s.clinicianId)) ===
+            (q.funding || r.carePreference?.funding || 'NHS') &&
           slotInstant(s) > new Date() &&
           !booked(s.id) &&
           (!q.clinician || s.clinicianId === q.clinician) &&
@@ -322,7 +354,10 @@ function reserve(requestId: string, slotId: string, replaceId?: string) {
         replaceId,
       );
     }
+    const provider = clinicians.find((c) => c.id === s.clinicianId);
     const b: Booking = {
+      funding: clinicianFunding(provider),
+      feeGbp: consultationFee(provider),
       id: 'WB-A' + randomUUID().slice(0, 7).toUpperCase(),
       requestId,
       slotId,
@@ -455,7 +490,9 @@ app.patch('/api/staff/requests/:id', (req, res) => {
 });
 let active: string | null = null;
 const stops = new Set<string>();
-app.get('/api/staff/history', (_req, res) => res.json([...history, ...expandedTraining]));
+app.get('/api/staff/history', (_req, res) =>
+  res.json([...history, ...expandedTraining, ...training500]),
+);
 app.get('/api/staff/receipts', (_req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename="wellby-request-receipts.json"');
   res.json({ training: read('example'), evaluation: read('evaluation') });
@@ -529,14 +566,12 @@ app.post('/api/staff/batch/:id/stop', (req, res) => {
 });
 app.use('/api', (_req, res) => res.status(404).json({ error: 'This page could not be found.' }));
 app.use((e: any, _req: express.Request, res: express.Response, _next: express.NextFunction) =>
-  res
-    .status(400)
-    .json({
-      error:
-        e instanceof z.ZodError
-          ? 'Please complete the required fields before continuing.'
-          : e.message || 'Something went wrong.',
-    }),
+  res.status(400).json({
+    error:
+      e instanceof z.ZodError
+        ? 'Please complete the required fields before continuing.'
+        : e.message || 'Something went wrong.',
+  }),
 );
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('dist'));

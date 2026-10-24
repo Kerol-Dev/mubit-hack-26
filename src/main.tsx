@@ -8,6 +8,7 @@ import './journey.css';
 import './practice.css';
 import './care-studio.css';
 import './simple-portal.css';
+import './auth.css';
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

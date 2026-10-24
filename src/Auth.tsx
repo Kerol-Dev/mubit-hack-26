@@ -15,6 +15,9 @@ import {
   AlertCircle,
   Plus,
   ChevronRight,
+  CalendarDays,
+  HeartPulse,
+  FolderHeart,
 } from 'lucide-react';
 import type { Patient } from '../shared/types';
 export type DemoUser = { id: string; profile: Patient };
@@ -31,17 +34,10 @@ async function send(path: string, body: unknown, method = 'POST') {
 function AuthLogo() {
   return (
     <span className="logo">
-      <svg viewBox="0 0 43 36" aria-hidden="true">
-        <path
-          d="M4 7l8 24L21.5 12 31 31l8-24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M12 2h8v10h10v8H20v10h-8V20H2v-8h10z" fill="currentColor" />
       </svg>
-      wellby<span>+</span>
+      wellby<span>.</span>
     </span>
   );
 }
@@ -72,45 +68,46 @@ export function AuthScreen({ onAuth }: { onAuth: (u: DemoUser) => void }) {
     }
   };
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-refresh">
       <section className="auth-story">
         <AuthLogo />
         <div className="auth-story-copy">
           <span className="auth-kicker">WILLOWBROOK MEDICAL CENTRE</span>
           <h1>
-            Your practice.
+            Care that fits
             <br />
-            Your care.
-            <br />
-            In one place.
+            around you.
           </h1>
           <p>
-            Contact your care team, arrange an appointment and keep track of your health requests.
+            A little less admin. A clearer next step. Your practice, appointments and care,
+            together.
           </p>
         </div>
         <div className="auth-service-directory">
           <div>
-            <span>01</span>
-            <p>Ask for help with a health concern</p>
-            <ArrowRight size={18} />
+            <HeartPulse size={21} />
+            <p>
+              <strong>Find the right care</strong>
+              <span>Tell us what you need help with.</span>
+            </p>
           </div>
           <div>
-            <span>02</span>
-            <p>Choose an appointment that suits you</p>
-            <ArrowRight size={18} />
+            <CalendarDays size={21} />
+            <p>
+              <strong>Make time for your health</strong>
+              <span>Choose a visit that works for you.</span>
+            </p>
           </div>
           <div>
-            <span>03</span>
-            <p>Keep your care information together</p>
-            <ArrowRight size={18} />
+            <FolderHeart size={21} />
+            <p>
+              <strong>Everything, in one place</strong>
+              <span>Keep up with requests and appointments.</span>
+            </p>
           </div>
         </div>
         <div className="auth-story-footer">
-          <p>
-            A fictional practice, designed around
-            <br />
-            <strong>a more straightforward patient experience.</strong>
-          </p>
+          WILLOWBROOK MEDICAL CENTRE<span>Your patient portal</span>
         </div>
       </section>
       <section className="auth-main">
@@ -123,28 +120,34 @@ export function AuthScreen({ onAuth }: { onAuth: (u: DemoUser) => void }) {
             <span className="auth-small-mark">
               <Plus size={23} />
             </span>
-            <h2>{signup ? 'Create your account' : 'Sign in to your portal'}</h2>
+            <h2>{signup ? 'Create your account' : 'Welcome back'}</h2>
             <p>
               {signup
                 ? 'Use fictional details to explore the practice.'
-                : 'Access your appointments, requests and personal details.'}
+                : 'Sign in to pick up where you left off.'}
             </p>
           </div>
-          <div className="auth-tabs">
+          <div className="auth-tabs" aria-label="Account access">
             <button
               className={!signup ? 'active' : ''}
+              aria-pressed={!signup}
+              disabled={busy}
               onClick={() => {
                 setSignup(false);
                 setError('');
+                setForgot(false);
               }}
             >
               Sign in
             </button>
             <button
               className={signup ? 'active' : ''}
+              aria-pressed={signup}
+              disabled={busy}
               onClick={() => {
                 setSignup(true);
                 setError('');
+                setForgot(false);
               }}
             >
               Create an account
@@ -197,6 +200,7 @@ export function AuthScreen({ onAuth }: { onAuth: (u: DemoUser) => void }) {
               <div className="auth-input">
                 <LockKeyhole size={17} />
                 <input
+                  aria-label="Password"
                   type={visible ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -248,7 +252,7 @@ export function AuthScreen({ onAuth }: { onAuth: (u: DemoUser) => void }) {
           </form>
           <div className="auth-divider">
             <span />
-            EXPLORING WELLBY?
+            JUST EXPLORING?
             <span />
           </div>
           <button
@@ -259,17 +263,13 @@ export function AuthScreen({ onAuth }: { onAuth: (u: DemoUser) => void }) {
             <img src="/images/maya.jpg" alt="Stock photo for the demo patient" />
             <span>
               <strong>Continue as Maya Patel</strong>
-              <small>A ready-to-explore patient account</small>
+              <small>Explore with a ready-made demo profile</small>
             </span>
             <ArrowRight size={19} />
           </button>
-          <div className="demo-credentials">
-            <span>maya@wellby.demo</span>
-            <span>Wellby2026!</span>
-          </div>
           <div className="auth-assurance">
             <ShieldCheck size={15} />
-            <span>Local demo · Fictional records · No NHS connection</span>
+            <span>Demo only · Fictional records · Not an NHS service</span>
           </div>
         </div>
         <div className="auth-bottom">

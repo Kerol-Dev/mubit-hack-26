@@ -16,3 +16,7 @@ coverage/
 # Local operational journals contain machine-specific paths and session notes.
 OVERNIGHT.md
 TESTING.md
+
+# Local render intermediates and superseded submission packages.
+tmp/
+output/

@@ -63,6 +63,11 @@ export function constrain(input: Intake, d: Decision): Decision {
   if (d.needsReview && !['gp', 'review'].includes(d.route)) return { ...d, route: 'review' };
   return d;
 }
+// Explicit opt-in for this fictional portal. Evaluations still call navigate
+// with their own recording policy and never inherit the demo setting.
+export function navigatePatientRequest(input: Intake): Promise<Decision> {
+  return navigate(input, process.env.MUBIT_RECORD_DEMO_REQUESTS === 'true');
+}
 export async function navigate(
   input: Intake,
   record = false,

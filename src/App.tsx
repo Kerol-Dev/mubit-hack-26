@@ -1,3 +1,6 @@
+import { UrgentCareWorkspace } from './UrgentCareWorkspace';
+import { UrgentCare } from './UrgentCare';
+import type { CarePreference } from '../shared/departments';
 import { SupportChat } from './SupportChat';
 import { RequestProgress } from './RequestProgress';
 import { PracticeHome } from './PracticeHome';
@@ -125,7 +128,7 @@ function Avatar({ c, large = false }: { c: Clinician; large?: boolean }) {
   return (
     <span className={`avatar photo-avatar ${c.color} ${large ? 'large' : ''}`}>
       <img
-        src={`/images/${c.id}.jpg`}
+        src={`/images/${c.photoId || c.id}.jpg`}
         alt={`Stock portrait for ${c.name}, a fictional clinician`}
         style={{
           objectPosition: (
@@ -253,6 +256,7 @@ export default function App() {
     />
   );
 }
+const isSharedPreview = !!document.querySelector('meta[name="wellby-guest-preview"]');
 function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
   const [state, setState] = useState<State | null>(null),
     [view, setView] = useState(() => {
@@ -262,10 +266,11 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
         'appointments',
         'requests',
         'departments',
+        'urgent-care',
         'practice',
         'profile',
         'staff',
-      ].includes(v)
+      ].includes(v) && !(isSharedPreview && v === 'staff')
         ? v
         : 'home';
     }),
@@ -273,6 +278,7 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
       request?: CareRequest;
       replaceId?: string;
       example?: string;
+      carePreference?: CarePreference;
     } | null>(null),
     [help, setHelp] = useState(false),
     [profile, setProfile] = useState(false),
@@ -304,10 +310,11 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
           'appointments',
           'requests',
           'departments',
+          'urgent-care',
           'practice',
           'profile',
           'staff',
-        ].includes(v)
+        ].includes(v) && !(isSharedPreview && v === 'staff')
           ? v
           : 'home',
       );
@@ -376,6 +383,7 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
             { id: 'home', label: 'Home' },
             { id: 'appointments', label: 'Appointments' },
             { id: 'requests', label: 'Care requests' },
+            { id: 'departments', label: 'Care services' },
             { id: 'practice', label: 'Your practice' },
           ].map((n) => (
             <button
@@ -400,7 +408,9 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
             </div>
           ) : (
             <>
-              {view === 'home' ? (
+              {view === 'urgent-care' ? (
+                <UrgentCare onBack={() => go('home')} />
+              ) : view === 'home' ? (
                 <PracticeHome
                   state={state}
                   onStart={(example) => setFlow({ example })}
@@ -453,7 +463,9 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
                   </div>
                 </>
               ) : view === 'departments' ? (
-                <Departments onStart={(example) => setFlow({ example })} />
+                <Departments
+                  onStart={(example, carePreference) => setFlow({ example, carePreference })}
+                />
               ) : view === 'practice' ? (
                 <Practice state={state} onStart={() => setFlow({})} />
               ) : view === 'profile' ? (
@@ -474,10 +486,12 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
                 </div>
                 <div>
                   <button onClick={() => setHelp(true)}>Help & guidance</button>
-                  <button onClick={() => go(view === 'staff' ? 'home' : 'staff')}>
-                    {view === 'staff' ? 'Patient portal' : 'Practice workspace'}
-                    <ArrowUpRight size={12} />
-                  </button>
+                  {!isSharedPreview && (
+                    <button onClick={() => go(view === 'staff' ? 'home' : 'staff')}>
+                      {view === 'staff' ? 'Patient portal' : 'Practice workspace'}
+                      <ArrowUpRight size={12} />
+                    </button>
+                  )}
                   <button onClick={() => void onLogout()}>Sign out</button>
                   <span>Fictional demonstration practice</span>
                 </div>
@@ -500,6 +514,7 @@ function Portal({ onLogout }: { onLogout: () => Promise<void> }) {
           initialRequest={flow.request}
           replaceId={flow.replaceId}
           example={flow.example}
+          carePreference={flow.carePreference}
           onClose={() => setFlow(null)}
           refresh={refresh}
           onAppointments={() => {
@@ -801,6 +816,14 @@ function AppointmentDetail({
           </span>
         </div>
       </div>
+      {a.funding === 'Private' && (
+        <div className="care-visit-price">
+          <span>
+            Private consultation<small>Illustrative fee · no payment taken</small>
+          </span>
+          <strong>£{a.feeGbp}</strong>
+        </div>
+      )}
       <div className="appointment-preparation">
         <h3>Before your appointment</h3>
         <p>
@@ -926,7 +949,9 @@ function Practice({ state, onStart }: { state: State; onStart: () => void }) {
 function Staff({ state, refresh }: { state: State; refresh: () => Promise<void> }) {
   const [tab, setTab] = useState(() => {
       const t = location.hash.split('/')[1];
-      return ['inbox', 'schedule', 'comparison', 'learning'].includes(t) ? t : 'inbox';
+      return ['inbox', 'schedule', 'comparison', 'urgent-care', 'learning'].includes(t)
+        ? t
+        : 'inbox';
     }),
     [selected, setSelected] = useState<CareRequest | null>(null),
     [route, setRoute] = useState<Route>('gp'),
@@ -970,7 +995,9 @@ function Staff({ state, refresh }: { state: State; refresh: () => Promise<void> 
   useEffect(() => {
     const update = () => {
       const t = location.hash.split('/')[1];
-      setTab(['inbox', 'schedule', 'comparison', 'learning'].includes(t) ? t : 'inbox');
+      setTab(
+        ['inbox', 'schedule', 'comparison', 'urgent-care', 'learning'].includes(t) ? t : 'inbox',
+      );
     };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
@@ -987,6 +1014,7 @@ function Staff({ state, refresh }: { state: State; refresh: () => Promise<void> 
           ['inbox', 'Care inbox'],
           ['schedule', 'Practice schedule'],
           ['comparison', 'Model comparison'],
+          ['urgent-care', 'Urgent care'],
           ['learning', 'Settings & learning'],
         ].map(([id, l]) => (
           <button
@@ -1094,6 +1122,8 @@ function Staff({ state, refresh }: { state: State; refresh: () => Promise<void> 
               </div>
             ))}
         </div>
+      ) : tab === 'urgent-care' ? (
+        <UrgentCareWorkspace />
       ) : tab === 'comparison' ? (
         <Comparison />
       ) : (

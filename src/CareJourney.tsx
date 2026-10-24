@@ -1,3 +1,4 @@
+import { findDepartment, type CarePreference, type Funding } from '../shared/departments';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
@@ -82,11 +83,15 @@ function Portrait({ person, size = '' }: { person: Clinician; size?: string }) {
   return (
     <span className={'journey-portrait ' + size}>
       <img
-        src={'/images/' + person.id + '.jpg'}
+        src={'/images/' + (person.photoId || person.id) + '.jpg'}
         alt={`Stock portrait for ${person.name}, a fictional clinician`}
         style={{
           objectPosition:
-            person.id === 'amara' ? '72% 20%' : person.id === 'olivia' ? '30% 20%' : '50% 23%',
+            (person.photoId || person.id) === 'amara'
+              ? '72% 20%'
+              : (person.photoId || person.id) === 'olivia'
+                ? '30% 20%'
+                : '50% 23%',
         }}
       />
     </span>
@@ -137,6 +142,7 @@ export function CareFlow({
   initialRequest,
   replaceId,
   example,
+  carePreference,
   onClose,
   refresh,
   onAppointments,
@@ -145,6 +151,7 @@ export function CareFlow({
   initialRequest?: CareRequest;
   replaceId?: string;
   example?: string;
+  carePreference?: CarePreference;
   onClose: () => void;
   refresh: () => Promise<void>;
   onAppointments: () => void;
@@ -159,7 +166,9 @@ export function CareFlow({
       conditions: state.patient.conditions,
       medications: state.patient.medications,
       redFlags: [],
-      goal: 'Advice and an appointment if needed',
+      goal: carePreference
+        ? `Discuss ${findDepartment(carePreference.departmentId)?.name || 'care options'}; ${carePreference.funding} care preferred`
+        : 'Advice and an appointment if needed',
       consent: false,
     }),
     [safety, setSafety] = useState(''),
@@ -216,7 +225,7 @@ export function CareFlow({
     setBusy(true);
     setError('');
     try {
-      const r = await api<CareRequest>('/requests', { input, human });
+      const r = await api<CareRequest>('/requests', { input, human, carePreference });
       setRequest(r);
       setStage(3);
       await refresh();
@@ -427,6 +436,19 @@ export function CareFlow({
                             }}
                             className="journey-form"
                           >
+                            {carePreference && (
+                              <div className="care-selection-note">
+                                <Stethoscope size={18} />
+                                <span>
+                                  <strong>
+                                    {findDepartment(carePreference.departmentId)?.name}
+                                  </strong>{' '}
+                                  · {carePreference.funding === 'NHS' ? 'NHS care' : 'Private care'}
+                                  <br />
+                                  We’ll check the appropriate pathway from your symptoms.
+                                </span>
+                              </div>
+                            )}
                             <section className="journey-panel">
                               <div className="journey-panel-title">
                                 <span>
@@ -944,6 +966,15 @@ export function CareFlow({
                                 </span>
                               </div>
                             </div>
+                            {appointment.funding === 'Private' && (
+                              <div className="care-visit-price">
+                                <span>
+                                  Private consultation
+                                  <small>Illustrative fee · no payment taken</small>
+                                </span>
+                                <strong>£{appointment.feeGbp}</strong>
+                              </div>
+                            )}
                             <div className="ticket-bottom">
                               <FileText size={15} />
                               {appointment.reason}
@@ -1081,6 +1112,12 @@ function AppointmentPicker({
 }) {
   const [slots, setSlots] = useState<Slot[]>([]),
     [clinician, setClinician] = useState(''),
+    [funding, setFunding] = useState<Funding>(
+      request.carePreference?.funding === 'Private' &&
+        state.clinicians.some((c) => c.role === request.decision.route && c.funding === 'Private')
+        ? 'Private'
+        : 'NHS',
+    ),
     [mode, setMode] = useState(''),
     [day, setDay] = useState(''),
     [week, setWeek] = useState(0),
@@ -1100,7 +1137,9 @@ function AppointmentPicker({
     setLoading(true);
     setSelected('');
     setSlots([]);
-    api<Slot[]>('/slots?' + new URLSearchParams({ requestId: request.id, clinician, mode }))
+    api<Slot[]>(
+      '/slots?' + new URLSearchParams({ requestId: request.id, clinician, mode, funding }),
+    )
       .then((data) => {
         if (!active) return;
         setSlots(data);
@@ -1124,10 +1163,12 @@ function AppointmentPicker({
     return () => {
       active = false;
     };
-  }, [request.id, clinician, mode, reload, monday]);
+  }, [request.id, clinician, mode, funding, reload, monday]);
   const selectedSlot = slots.find((s) => s.id === selected),
     doctor = state.clinicians.find((c) => c.id === selectedSlot?.clinicianId),
-    team = state.clinicians.filter((c) => c.role === request.decision.route),
+    team = state.clinicians.filter(
+      (c) => c.role === request.decision.route && (c.funding || 'NHS') === funding,
+    ),
     daySlots = slots.filter((s) => s.date === day);
   const changeWeek = (n: number) => {
     setWeek(n);
@@ -1157,6 +1198,29 @@ function AppointmentPicker({
             UK time
           </span>
         </div>
+        <div className="care-funding-options" role="group" aria-label="NHS or private appointment">
+          {(['NHS', 'Private'] as const)
+            .filter((f) =>
+              state.clinicians.some(
+                (c) => c.role === request.decision.route && (c.funding || 'NHS') === f,
+              ),
+            )
+            .map((f) => (
+              <button
+                key={f}
+                disabled={busy}
+                aria-pressed={funding === f}
+                className={funding === f ? 'selected' : ''}
+                onClick={() => {
+                  setFunding(f);
+                  setClinician('');
+                  setSelected('');
+                }}
+              >
+                {f === 'NHS' ? 'NHS-style · no consultation fee' : 'Private · self-pay'}
+              </button>
+            ))}
+        </div>
         <fieldset disabled={busy || loading} className="journey-fieldset clinician-choice">
           <legend>1. Choose your clinician</legend>
           <div className="clinician-choices">
@@ -1184,7 +1248,10 @@ function AppointmentPicker({
                 <Portrait person={c} />
                 <span>
                   <strong>{c.name}</strong>
-                  <small>{c.title}</small>
+                  <small>
+                    {c.title}
+                    {c.funding === 'Private' ? ` · £${c.feeGbp} demo fee` : ''}
+                  </small>
                 </span>
                 {clinician === c.id && <Check size={15} />}
               </button>
@@ -1438,6 +1505,19 @@ function AppointmentPicker({
             <p className="booking-empty-hint">
               Select a date and time. Your visit details will appear here.
             </p>
+          </div>
+        )}
+        {selectedSlot && doctor && (
+          <div className="care-visit-price">
+            <span>
+              {doctor.funding === 'Private' ? 'Private consultation' : 'NHS-style consultation'}
+              <small>
+                {doctor.funding === 'Private'
+                  ? 'Illustrative fee · no payment taken'
+                  : 'Fictional appointment'}
+              </small>
+            </span>
+            <strong>{doctor.funding === 'Private' ? `£${doctor.feeGbp}` : 'No fee'}</strong>
           </div>
         )}
         <div className="summary-confirm">

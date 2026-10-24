@@ -3,14 +3,19 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, openSync, closeSync, unlinkSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { expandedTraining } from './training-expansion';
+import { training500 } from './training-500';
 import { instructions, decisionSchema } from './navigation';
 import { hash } from './benchmark-data';
 
 // Explicit invocation only. No auto retry, no evaluation traffic, no model switch.
 const count = Number(process.argv.find((v) => v.startsWith('--count='))?.split('=')[1] || 0);
 const send = process.argv.includes('--send');
-if (!Number.isInteger(count) || count < 1 || count > 100)
-  throw Error('Use --count=1..100; add --send to submit.');
+const target = Number(process.argv.find((v) => v.startsWith('--target='))?.split('=')[1] || 0);
+if (
+  !(Number.isInteger(target) && target >= 1 && target <= 500) &&
+  !(Number.isInteger(count) && count >= 1 && count <= 500)
+)
+  throw Error('Use --target=1..500 or --count=1..500; add --send to submit.');
 mkdirSync('.wellby', { recursive: true });
 const db = new DatabaseSync('.wellby/practice.sqlite');
 db.exec(
@@ -31,18 +36,22 @@ const recorded = new Set(
     .map((r) => r.id),
 );
 // Round-robin routes so even a small first batch covers every pathway.
-const pool = [...expandedTraining].sort(
-  (a, b) => Number(a.id.slice(-2)) - Number(b.id.slice(-2)) || a.expected.localeCompare(b.expected),
-);
+const pool = [...expandedTraining, ...training500].sort((a, b) => {
+  const av = a.id.startsWith('T3-') ? Number(a.id.slice(-1)) : -1;
+  const bv = b.id.startsWith('T3-') ? Number(b.id.slice(-1)) : -1;
+  return av - bv || a.id.localeCompare(b.id);
+});
 const pending = pool
   .filter((c) => !attempted.has(`${fingerprint}:${c.id}`) && !recorded.has(c.id))
-  .slice(0, count);
+  .slice(0, target ? Math.max(0, target - recorded.size) : count);
 console.log(
   JSON.stringify({
     mode: send ? 'submit' : 'dry-run',
     model,
     pending: pending.length,
     total: pool.length,
+    alreadyRecorded: recorded.size,
+    target: target || null,
     byRoute: pending.reduce(
       (a, c) => ({ ...a, [c.expected]: (a[c.expected] || 0) + 1 }),
       {} as Record<string, number>,
@@ -68,7 +77,7 @@ const job = {
   errors: 0,
   startedAt: new Date().toISOString(),
   model,
-  dataset: 'T2',
+  dataset: target ? 'T3-target-' + target : 'T2-T3',
   error: '',
 };
 const put = db.prepare('INSERT OR REPLACE INTO records(kind,id,data) VALUES(?,?,?)');
@@ -161,7 +170,7 @@ try {
           instructionHash: receipt.instructionHash,
           acceptance: receipt.acceptance,
           at: receipt.at,
-          trainingSet: 'T2',
+          trainingSet: c.id.startsWith('T3-') ? 'T3-context-augmentation' : 'T2',
         }),
       );
       job.completed++;

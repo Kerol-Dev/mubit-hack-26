@@ -4,262 +4,328 @@ import {
   Search,
   ArrowUpRight,
   ArrowRight,
-  MapPin,
-  Clock3,
-  Plus,
   X,
   Heart,
   Stethoscope,
-  Pill,
   Activity,
   ShieldCheck,
-  FileText,
   Users,
-  ChevronRight,
-  Phone,
+  Ear,
+  Clock3,
+  MapPin,
+  Check,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { departments } from '../shared/departments';
-const symbols = [
-  Stethoscope,
-  Pill,
-  Heart,
-  Activity,
-  Heart,
-  ShieldCheck,
-  Activity,
-  Plus,
-  Heart,
-  Users,
-  Users,
-  Phone,
-];
-export function Departments({ onStart }: { onStart: (category?: string) => void }) {
+import {
+  departments,
+  filterDepartments,
+  type CarePreference,
+  type Department,
+  type Funding,
+} from '../shared/departments';
+import './care-directory.css';
+const groups = ['All services', ...new Set(departments.map((d) => d.group))];
+const icons: Record<string, typeof Heart> = {
+  'Everyday care': Stethoscope,
+  'Movement & rehabilitation': Activity,
+  'Mental health & wellbeing': Heart,
+  'Family & reproductive health': Users,
+  'Eyes, ears & dental': Ear,
+  'Specialist clinics': Stethoscope,
+  'Long-term health': Heart,
+  'Urgent help': ShieldCheck,
+};
+export function Departments({
+  onStart,
+}: {
+  onStart: (category?: string, preference?: CarePreference) => void;
+}) {
   const [q, setQ] = useState(''),
-    [filter, setFilter] = useState('All departments'),
-    [selected, setSelected] = useState<(typeof departments)[number] | null>(null);
-  const shown = departments.filter(
-    (d) =>
-      (filter === 'All departments' || d.access === filter) &&
-      [d.name, d.description, d.area].join(' ').toLowerCase().includes(q.toLowerCase()),
-  );
+    [group, setGroup] = useState('All services'),
+    [funding, setFunding] = useState('All care'),
+    [access, setAccess] = useState('Any access'),
+    [selected, setSelected] = useState<Department | null>(null),
+    [choice, setChoice] = useState<Funding>('NHS');
+  const shown = filterDepartments(q, group, funding, access);
+  const reset = () => {
+    setQ('');
+    setGroup('All services');
+    setFunding('All care');
+    setAccess('Any access');
+  };
   return (
-    <>
-      <div className="department-intro">
-        <span className="welcome-overline">
-          <span />
-          CARE, ALL IN ONE PLACE
-        </span>
-        <h1>Find your way to better care.</h1>
-        <p>From everyday health to specialist support. Start in the right place.</p>
-      </div>
-      <div className="department-campus">
+    <div className="care-directory">
+      <header className="directory-heading">
         <div>
-          <span>WILLOWBROOK CARE CAMPUS</span>
-          <h2>
-            A connected team.
-            <br />A clearer next step.
-          </h2>
-          <p>
-            Tell us what’s happening and we’ll help you find the right service. Specialist clinics
-            begin with a care-team review.
-          </p>
-          <button onClick={() => onStart()}>
-            Find the right care
-            <ArrowUpRight size={17} />
-          </button>
+          <span className="directory-eyebrow">YOUR CARE DIRECTORY</span>
+          <h1>
+            The right care.
+            <br />A clearer way there.
+          </h1>
+          <p>Explore everyday care, specialist teams and support near you.</p>
         </div>
-        <div className="campus-directory">
-          <span>YOUR GUIDE TO THE CAMPUS</span>
-          {[
-            ['G', 'Primary care, pharmacy & therapy'],
-            ['01', 'Heart, skin & respiratory clinics'],
-            ['02', 'Family care & specialist services'],
-          ].map(([floor, label]) => (
-            <div key={floor}>
-              <strong>{floor}</strong>
-              <span>{label}</span>
-              <ArrowUpRight size={14} />
-            </div>
-          ))}
-          <small>Fictional campus · Illustrative department locations</small>
-        </div>
-      </div>
-      <div className="department-toolbar">
-        <div>
-          {['All departments', 'Direct care', 'GP referral', 'Immediate help'].map((f) => (
-            <button key={f} className={filter === f ? 'active' : ''} onClick={() => setFilter(f)}>
-              {f}
-            </button>
-          ))}
-        </div>
+        <button className="directory-start" onClick={() => onStart()}>
+          <span>
+            <Stethoscope size={25} />
+            <b>Not sure where to start?</b>
+            <small>Tell us about your symptoms first.</small>
+          </span>
+          <ArrowRight size={22} />
+        </button>
+      </header>
+      <div className="directory-searchbar">
         <label>
-          <Search size={16} />
+          <Search size={21} />
           <input
-            aria-label="Search departments"
+            aria-label="Search care services"
+            placeholder="Search by service or concern — e.g. skin, knee, anxiety"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search departments"
           />
-        </label>
-      </div>
-      <div className="department-count">
-        {shown.length} services <span>Explore a department to see your next step.</span>
-      </div>
-      <div className="department-grid">
-        {shown.map((d) => {
-          const Icon = symbols[departments.indexOf(d)];
-          return (
-            <button key={d.id} className="department-card" onClick={() => setSelected(d)}>
-              <div className="department-card-top">
-                <span className={'department-icon ' + d.access.split(' ')[0].toLowerCase()}>
-                  <Icon size={23} />
-                </span>
-                <span
-                  className={
-                    'department-badge ' +
-                    (d.access === 'Direct care'
-                      ? 'direct'
-                      : d.access === 'Immediate help'
-                        ? 'urgent'
-                        : '')
-                  }
-                >
-                  {d.access}
-                </span>
-              </div>
-              <h3>{d.name}</h3>
-              <p>{d.description}</p>
-              <span className="department-location">
-                <MapPin size={13} />
-                {d.area}
-              </span>
-              <div className="department-card-bottom">
-                Explore department
-                <ArrowUpRight size={15} />
-              </div>
+          {q && (
+            <button onClick={() => setQ('')} aria-label="Clear search">
+              <X size={17} />
             </button>
-          );
-        })}
+          )}
+        </label>
+        <div className="directory-funding" role="group" aria-label="Care funding">
+          {['All care', 'NHS', 'Private'].map((v) => (
+            <button
+              key={v}
+              aria-pressed={funding === v}
+              className={funding === v ? 'active' : ''}
+              onClick={() => setFunding(v)}
+            >
+              {v === 'NHS' ? 'NHS care' : v}
+            </button>
+          ))}
+        </div>
       </div>
-      {!shown.length && (
-        <div className="department-empty">
-          <Search size={26} />
-          <h3>No departments found.</h3>
-          <button
-            onClick={() => {
-              setQ('');
-              setFilter('All departments');
-            }}
-          >
-            Clear filters
-          </button>
-        </div>
-      )}
-      <div className="department-guidance">
-        <ShieldCheck size={21} />
-        <div>
-          <strong>Not sure where to start?</strong>
-          <p>
-            You don’t need to choose a department yourself. Describe your symptoms and review a
-            suggested next step.
+      <div className="directory-layout">
+        <aside className="directory-sidebar">
+          <h2>Browse services</h2>
+          {groups.map((g) => (
+            <button
+              key={g}
+              className={group === g ? 'active' : ''}
+              aria-pressed={group === g}
+              onClick={() => setGroup(g)}
+            >
+              <span>{g}</span>
+              <small>
+                {g === 'All services'
+                  ? departments.length
+                  : departments.filter((d) => d.group === g).length}
+              </small>
+            </button>
+          ))}
+          <div className="directory-local">
+            <MapPin size={19} />
+            <b>Willowbrook, London</b>
+            <p>
+              England care pathways.
+              <br />
+              Fictional services and appointments.
+            </p>
+          </div>
+        </aside>
+        <section className="directory-results">
+          <div className="directory-resultbar">
+            <h2>
+              {group} <span>{shown.length}</span>
+            </h2>
+            <label>
+              <SlidersHorizontal size={15} />
+              <select
+                aria-label="Filter by access"
+                value={access}
+                onChange={(e) => setAccess(e.target.value)}
+              >
+                {[
+                  'Any access',
+                  'Direct care',
+                  'Self-referral',
+                  'GP referral',
+                  'Immediate help',
+                ].map((v) => (
+                  <option key={v}>{v}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="directory-cards">
+            {shown.map((d) => {
+              const Icon = icons[d.group] || Stethoscope;
+              return (
+                <button
+                  key={d.id}
+                  className="directory-card"
+                  onClick={() => {
+                    setSelected(d);
+                    setChoice(
+                      funding === 'Private' && d.funding.includes('Private') ? 'Private' : 'NHS',
+                    );
+                  }}
+                >
+                  <div className="directory-card-top">
+                    <span
+                      className={
+                        'directory-symbol ' + (d.access === 'Immediate help' ? 'urgent' : '')
+                      }
+                    >
+                      <Icon size={23} />
+                    </span>
+                    <span className="directory-access">{d.access}</span>
+                  </div>
+                  <h3>{d.name}</h3>
+                  <p>{d.description}</p>
+                  <footer>
+                    <span>
+                      {d.funding.map((f) => (
+                        <small key={f} className={f === 'Private' ? 'private' : ''}>
+                          {f === 'NHS' ? 'NHS care' : 'Private option'}
+                        </small>
+                      ))}
+                    </span>
+                    <ArrowUpRight size={19} />
+                  </footer>
+                </button>
+              );
+            })}
+          </div>
+          {!shown.length && (
+            <div className="directory-empty">
+              <Search size={30} />
+              <h3>No matching services</h3>
+              <p>Try a shorter search or choose a different filter.</p>
+              <button onClick={reset}>Clear filters</button>
+            </div>
+          )}
+          <p className="directory-footnote">
+            This demo follows England pathways. Access and eligibility differ across the UK and
+            between local services.
           </p>
-        </div>
-        <button onClick={() => onStart()}>
-          Start a request
-          <ArrowRight size={15} />
-        </button>
+        </section>
       </div>
       <Dialog.Root open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
         <Dialog.Portal>
           <Dialog.Overlay className="overlay" />
-          <Dialog.Content className="department-dialog">
-            <div className="department-dialog-heading">
-              <span>WILLOWBROOK · DEPARTMENTS</span>
-              <Dialog.Close className="icon-button" aria-label="Close department">
-                <X size={20} />
-              </Dialog.Close>
-            </div>
+          <Dialog.Content className="service-detail">
             {selected && (
               <>
-                <span className="department-badge">{selected.access}</span>
-                <Dialog.Title>{selected.name}</Dialog.Title>
-                <Dialog.Description>{selected.description}</Dialog.Description>
-                <div className="department-details">
-                  <p>
-                    <MapPin size={17} />
-                    {selected.area}
-                  </p>
-                  <p>
-                    <Clock3 size={17} />
-                    {selected.hours}
-                  </p>
-                </div>
-                <div className="department-how">
-                  <h3>Your next step</h3>
-                  {selected.access === 'Immediate help' ? (
-                    <p>
-                      For real urgent advice, use NHS 111. In a life-threatening emergency, call
-                      999. Don’t wait for a routine online appointment.
-                    </p>
-                  ) : selected.access === 'GP referral' ? (
-                    <>
-                      <p>
-                        Start with your symptoms. The care team can review whether a specialist
-                        referral is appropriate. This demo does not book specialist clinics
-                        automatically.
-                      </p>
-                      <ol>
-                        <li>
-                          <span>1</span>Describe your concern
-                        </li>
-                        <li>
-                          <span>2</span>Review with primary care
-                        </li>
-                        <li>
-                          <span>3</span>Discuss specialist referral, if appropriate
-                        </li>
-                      </ol>
-                    </>
-                  ) : (
-                    <p>
-                      Tell us about your concern, review the suggested care pathway, then choose an
-                      available appointment if suitable.
-                    </p>
+                <header>
+                  <span>EXPLORE YOUR CARE</span>
+                  <Dialog.Close aria-label="Close service" className="icon-button">
+                    <X size={22} />
+                  </Dialog.Close>
+                </header>
+                <div className="service-detail-body">
+                  <span className="directory-access">{selected.access}</span>
+                  <Dialog.Title>{selected.name}</Dialog.Title>
+                  <Dialog.Description>{selected.description}</Dialog.Description>
+                  {selected.funding.length > 1 && (
+                    <div
+                      className="service-care-choice"
+                      role="group"
+                      aria-label="Choose NHS or private care"
+                    >
+                      {selected.funding.map((f) => (
+                        <button
+                          key={f}
+                          className={choice === f ? 'selected' : ''}
+                          aria-pressed={choice === f}
+                          onClick={() => setChoice(f)}
+                        >
+                          <span>{f === 'NHS' ? 'NHS care' : 'Private care'}</span>
+                          <small>
+                            {f === 'NHS'
+                              ? 'Local pathway & eligibility'
+                              : 'Self-pay or insurer-funded'}
+                          </small>
+                          {choice === f && <Check size={17} />}
+                        </button>
+                      ))}
+                    </div>
                   )}
+                  <div className="service-facts">
+                    <span>
+                      <MapPin size={17} />
+                      {selected.area}
+                    </span>
+                    <span>
+                      <Clock3 size={17} />
+                      {selected.hours}
+                    </span>
+                  </div>
+                  <section className="service-next">
+                    <h3>{choice === 'Private' ? 'Your private care options' : 'Your next step'}</h3>
+                    <p>{selected.nextStep}</p>
+                    {choice === 'Private' && (
+                      <p className="service-private-note">
+                        Private GP, physiotherapy and planned nurse visits show an illustrative fee
+                        before you confirm. Specialist consultations need review; confirm referral
+                        requirements, fees and insurance authorisation with the provider.
+                      </p>
+                    )}
+                  </section>
+                  <details className="service-eligibility">
+                    <summary>Access & eligibility</summary>
+                    <p>{selected.eligibility}</p>
+                    {selected.source && (
+                      <a href={selected.source} target="_blank" rel="noreferrer">
+                        Read official NHS guidance <ArrowUpRight size={14} />
+                      </a>
+                    )}
+                  </details>
+                  <small className="service-demo-note">
+                    Fictional care directory. No NHS referral or real appointment is made here.
+                  </small>
                 </div>
-                {selected.access === 'Immediate help' ? (
-                  <a
-                    className="journey-button"
-                    href="https://111.nhs.uk/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Visit NHS 111
-                    <ArrowUpRight size={16} />
-                  </a>
-                ) : (
-                  <button
-                    className="journey-button"
-                    onClick={() => {
-                      const c = selected.route;
-                      setSelected(null);
-                      onStart(c);
-                    }}
-                  >
-                    {selected.access === 'GP referral'
-                      ? 'Start a referral discussion'
-                      : 'Find care with this team'}
-                    <ArrowRight size={16} />
-                  </button>
-                )}
-                <small>
-                  Fictional department and location. No real healthcare service is booked.
-                </small>
+                <footer>
+                  {selected.access === 'Immediate help' ? (
+                    <a
+                      className="directory-primary"
+                      href="https://111.nhs.uk/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Get NHS 111 help <ArrowUpRight size={18} />
+                    </a>
+                  ) : (
+                    <>
+                      <button
+                        className="directory-primary"
+                        onClick={() => {
+                          const d = selected;
+                          setSelected(null);
+                          onStart(d.route, { departmentId: d.id, funding: choice });
+                        }}
+                      >
+                        {selected.access === 'Self-referral'
+                          ? 'Ask the practice for support'
+                          : selected.access === 'GP referral'
+                            ? 'Start a referral discussion'
+                            : 'Start a care request'}
+                        <ArrowRight size={18} />
+                      </button>
+                      {selected.access === 'Self-referral' && selected.source && (
+                        <a
+                          className="directory-secondary"
+                          href={selected.source}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View self-referral information <ArrowUpRight size={16} />
+                        </a>
+                      )}
+                    </>
+                  )}
+                </footer>
               </>
             )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </>
+    </div>
   );
 }

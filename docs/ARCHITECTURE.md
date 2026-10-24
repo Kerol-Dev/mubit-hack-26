@@ -32,7 +32,7 @@ The chat shows a bold non-medical-advice notice, limits message size and request
 
 Training requests record provider answers through Mubit. Local expected labels are used for illustrative analysis and are not sent as corrected answers to the provider. Acceptance, adapter training and deployment happen in Mubit and must be verified there. More calls do not guarantee higher quality.
 
-Normal patient requests and evaluations exclude request/response content from recording. The gateway's routing decision is separate from the requested teacher model name.
+Patient requests exclude request/response content by default. `MUBIT_RECORD_DEMO_REQUESTS=true` explicitly enables full recording for fictional portal care-routing calls so they appear in Mubit Requests and become eligible for training. General chat replies and evaluations keep their separate metadata-only/off policy. The gateway's routing decision is separate from the requested teacher model name.
 
 ## Comparison
 

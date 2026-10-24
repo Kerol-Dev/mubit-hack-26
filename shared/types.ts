@@ -1,3 +1,4 @@
+import type { CarePreference } from './departments';
 export type Route = 'pharmacy' | 'gp' | 'nurse' | 'physio' | 'urgent' | 'emergency' | 'review';
 export const services: Record<
   Route,
@@ -70,6 +71,7 @@ export type Decision = {
   durationMs?: number;
 };
 export type CareRequest = {
+  carePreference?: CarePreference;
   id: string;
   patientId?: string;
   createdAt: string;
@@ -80,6 +82,9 @@ export type CareRequest = {
   history: { at: string; text: string }[];
 };
 export type Clinician = {
+  funding?: 'NHS' | 'Private';
+  feeGbp?: number;
+  photoId?: string;
   id: string;
   name: string;
   role: Route;
@@ -99,6 +104,8 @@ export type Slot = {
   route: Route;
 };
 export type Booking = {
+  funding?: 'NHS' | 'Private';
+  feeGbp?: number | null;
   id: string;
   requestId: string;
   slotId: string;

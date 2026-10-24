@@ -26,21 +26,22 @@ export function PracticeHome({
   onView,
   onAppointment,
   onRequest,
+  now = new Date(),
 }: {
+  now?: Date;
   state: State;
   onStart: (example?: string) => void;
   onView: (view: string) => void;
   onAppointment: (a: Appointment) => void;
   onRequest: (r: CareRequest) => void;
 }) {
-  const now = new Date(),
-    hour = Number(
-      new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Europe/London',
-        hour: 'numeric',
-        hourCycle: 'h23',
-      }).format(now),
-    );
+  const hour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      hour: 'numeric',
+      hourCycle: 'h23',
+    }).format(now),
+  );
   const today = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/London',
     year: 'numeric',
@@ -122,6 +123,14 @@ export function PracticeHome({
           )}
         </section>
       </div>
+      <button className="urgent-home-action" onClick={() => onView('urgent-care')}>
+        <Clock3 size={24} />
+        <span>
+          <strong>Nearest NHS urgent care</strong>
+          <small>Find a centre. Check waiting times.</small>
+        </span>
+        <ArrowRight size={23} />
+      </button>
       <section className="simple-requests">
         <header>
           <h2>Your requests{active.length > 0 && <span>{active.length}</span>}</h2>

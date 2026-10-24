@@ -6,7 +6,7 @@ Wellby is a working patient-portal demo built for the Mubit hackathon. A patient
 
 ![Wellby patient portal](docs/images/patient-portal.png)
 
-**This is a fictional demonstration, not a medical service.** People, records, locations and appointment availability are synthetic. Wellby does not diagnose conditions, contact the NHS or create real healthcare appointments.
+**This is a fictional demonstration, not a medical service.** Patients, records and appointment availability are synthetic. Urgent-care service locations come from attributed public directories. Wellby does not diagnose conditions, contact the NHS or create real healthcare appointments.
 
 ## Try the patient journey
 
@@ -60,7 +60,7 @@ The repeated task is **primary-care navigation**: turn a structured symptom inta
 
 - Synthetic historical-style inputs are sent with a consistent Haiku model, instruction and response contract.
 - Training calls use Mubit's full recording mode. Mubit reviews eligible provider answers and can train a task-specific adapter from retained examples.
-- Patient interactions and endpoint comparisons use metadata-only recording, excluding their request and response content from training.
+- Patient interactions default to metadata-only recording, which Mubit does not list in Requests. For fictional portal care-routing requests, set `MUBIT_RECORD_DEMO_REQUESTS=true` to store input/output and make those calls visible and eligible for training. General chat replies and endpoint comparisons remain metadata-only; evaluation content is excluded from training regardless of this setting.
 - Normal API requests use Mubit's automatic routing. The app does not invent an adapter-selection header or assume every gateway response was served by an adapter.
 - A separate conversational prompt handles chat replies. When a care summary is confirmed, the chat calls the same navigation function as the main symptom flow.
 
@@ -114,10 +114,15 @@ This is a locally hosted hackathon application. Sign-in separates demo accounts,
 
 ## Demo and credits
 
-- [Proposed 105-second product-film storyboard](docs/DEMO_VIDEO.md)
+- [93-second full-product demo and PDF deck](demo/README.md)
+- [Original product-film storyboard](docs/DEMO_VIDEO.md)
 - [Architecture and Mubit integration](docs/ARCHITECTURE.md)
 - [Stock-photography credits](public/photo-credits.txt). Portraits illustrate fictional identities and do not imply endorsement.
 - [Mubit: first adapter](https://docs.mubit.ai/guides/first-adapter)
 - [Mubit: Anthropic integration](https://docs.mubit.ai/guides/connect-anthropic)
 
 Built with React, TypeScript, Vite, Express, SQLite, Radix UI and Lucide.
+
+## Urgent care waiting times
+
+The patient home includes a UK postcode urgent-care finder with sourced service locations in all four nations. Mubit waiting-time forecasts are available for the three centres covered by the historical cohort; other locations show service information without inventing a wait. See [setup, data and verified results](docs/URGENT-CARE.md). The dedicated task has 500 recorded calls awaiting Mubit review; 100 evaluation cases remain separate. **Practice workspace → Urgent care** displays training progress, held-out evaluation metrics, request receipts and explicit test controls.

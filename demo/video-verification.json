@@ -1,0 +1,17 @@
+{
+  "sampled_frames": 2790,
+  "cursor_missing_samples": [],
+  "static_heading_deltas": [
+    {
+      "frames": "10s vs 11s",
+      "mean_pixel_delta": 0.0031969780725999634
+    },
+    {
+      "frames": "10s vs 12s",
+      "mean_pixel_delta": 0.0
+    }
+  ],
+  "booking_panel_frames_checked": 90,
+  "booking_panel_max_delta": 0.012498094802621552,
+  "booking_panel_flash_samples": []
+}

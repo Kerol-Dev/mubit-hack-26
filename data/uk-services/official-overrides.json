@@ -1,0 +1,15 @@
+[
+  {
+    "id": "nhs-wales-uhw",
+    "name": "University Hospital of Wales",
+    "address": "Heath Park, Cardiff",
+    "postcode": "CF14 4XW",
+    "phone": "02920 747747",
+    "country": "Wales",
+    "latitude": 51.506876,
+    "longitude": -3.189451,
+    "kind": "ae",
+    "url": "https://111.wales.nhs.uk/LocalServices/ViewLocalService.aspx?id=3133",
+    "sourceUrl": "https://111.wales.nhs.uk/LocalServices/ViewLocalService.aspx?id=3133"
+  }
+]
