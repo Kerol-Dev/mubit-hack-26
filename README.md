@@ -1,128 +1,173 @@
 # Wellby
 
-### A clearer route from a health concern to an appointment.
+**Your care, all in one place.**
 
-Wellby is a working patient-portal demo built for the Mubit hackathon. A patient describes a concern, reviews their details, receives a suggested care pathway, and chooses an appointment with the appropriate fictional care team. The practice workspace brings requests, schedules and model comparisons together.
+Wellby brings symptom intake, care navigation, appointments and nearby urgent care into one patient portal. Describe what is happening, find a suitable next step and choose an appointment—without having to understand the practice's departments first.
+
+Built for the **Mubit hackathon**, with Mubit powering **care routing, Ask Wellby chat and urgent-care waiting-time forecasts**.
+
+**[Watch the final demo](demo/Wellby-demo-1080p.mp4) · [Open the PDF deck](demo/Wellby-deck.pdf) · [Run locally](#run-locally) · [Explore the architecture](docs/ARCHITECTURE.md)**
 
 ![Wellby patient portal](docs/images/patient-portal.png)
 
-**This is a fictional demonstration, not a medical service.** Patients, records and appointment availability are synthetic. Urgent-care service locations come from attributed public directories. Wellby does not diagnose conditions, contact the NHS or create real healthcare appointments.
+## The product
 
-## Try the patient journey
+### From a concern to an appointment
 
-1. Sign in with **Continue as Maya Patel**.
-2. Choose **Request care** and describe a fictional concern.
-3. Check the health details and review the summary before submitting.
-4. Read the suggested next step. Routine pathways offer available demo appointments; urgent and uncertain cases follow escalation or review flows.
-5. Choose a time and confirm. The appointment appears in your account, with rescheduling, cancellation and calendar download.
+A guided care request collects symptoms, duration, severity and relevant health details. Patients review their information before sending it. Mubit suggests a care pathway; Wellby validates the response and presents the appropriate next step.
 
-The **Ask Wellby** chat offers another entry point: general health information, an editable conversation about symptoms, a care summary to confirm, and appointment selection. Its permanent **Not medical advice** notice remains visible.
+Routine journeys lead to clinician and appointment selection, followed by an explicit booking confirmation. Patients can then view, reschedule or cancel their appointments and download a calendar entry. The care directory includes GP, pharmacy, nursing, physiotherapy and other services, with NHS, private and self-referral options.
+
+### Ask Wellby
+
+A chat panel stays within reach throughout the portal. It answers general health questions through Mubit, helps patients describe a concern and prepares an editable care summary. Once the patient confirms that summary, chat uses the same care-routing function as the main request flow.
+
+Appointment confirmation comes from the booking system, not from a generated chat reply. Urgent-care location and waiting-time questions hand off to the dedicated finder with the postcode carried across.
+
+### Nearby urgent care
+
+Enter a UK postcode and a concern to find nearby services. Postcodes are resolved against a real postcode service, and centre details come from attributed public directories covering all four UK nations.
+
+For centres supported by the historical dataset, Mubit forecasts a waiting-time range using the concern, arrival time and historical patterns. The results show only centres with complete forecasts. Severe or worsening symptoms change the interface to urgent advice instead of showing a queue estimate.
+
+**Current forecast coverage:** Central Middlesex, St Mary's and Charing Cross. UK-wide location lookup does not mean every centre has waiting-time data. These forecasts use fictional historical encounters, not a live NHS queue feed.
+
+### Practice workspace
+
+The staff-facing workspace brings together care requests, schedules, training progress and model comparisons. It includes a dedicated urgent-care area for its separate training task, held-out evaluation and request receipts.
+
+## See it in action
+
+| Deliverable                                       | What's inside                                                             |
+| ------------------------------------------------- | ------------------------------------------------------------------------- |
+| [Final product video](demo/Wellby-demo-1080p.mp4) | 97 seconds · 1080p · 30 fps · female narration, captions and music        |
+| [Submission deck](demo/Wellby-deck.pdf)           | Nine slides covering the patient journey and all three Mubit integrations |
+| [Demo guide](demo/README.md)                      | Chapter timestamps, media details and evidence notes                      |
+
+The video follows the patient home, symptom intake, Mubit routing, appointment booking, chat, urgent-care forecasts and the practice workspace. Its comparison segment uses **illustrative team-preview figures**, not measured adapter performance. Actual application runs retain their own measured results and receipts.
 
 ## Run locally
 
-Use **Node.js 24 LTS** and npm. The server uses the built-in `node:sqlite` module.
+Use **Node.js 24** and npm. Wellby uses Node's built-in SQLite module; no separate database server is needed.
 
 ```sh
+git clone https://github.com/Kerol-Dev/mubit-hack-26.git
+cd mubit-hack-26
 npm ci
 cp .env.example .env
+```
+
+Add your `MUBIT_API_KEY` to `.env`, then start the app:
+
+```sh
 npm run dev
 ```
 
-Open **http://127.0.0.1:4174**. The first start creates the local fictional practice, demo account and appointment availability automatically. No dataset download is needed.
+Open **http://127.0.0.1:4174**. The first start creates the fictional practice, demo account and appointment availability automatically.
 
-```sh
-npm test       # Offline integrity and workflow tests; no paid model calls
-npm run build # TypeScript check and production build
-npm start     # Serve the production build locally
-```
+Choose **Continue as Maya Patel**, or sign in with:
 
-Demo account: `maya@wellby.demo` / `Wellby2026!`. These are public demo credentials, not production credentials.
+|          | Demo credential    |
+| -------- | ------------------ |
+| Email    | `maya@wellby.demo` |
+| Password | `Wellby2026!`      |
 
-### Configure model access
+Without an API key, the portal and local appointment-management screens still work; AI features show an unavailable state. Starting the server does not start training or evaluation batches.
 
-All keys stay on the server in `.env`; none belong in client code or Git.
+### Configuration
 
-| Variable            | Purpose                                                                  |
-| ------------------- | ------------------------------------------------------------------------ |
-| `MUBIT_API_KEY`     | Enables care navigation, support chat and the Mubit comparison endpoint. |
-| `MUBIT_MODEL`       | Care-navigation teacher model; defaults to `claude-haiku-4-5`.           |
-| `ANTHROPIC_API_KEY` | Direct-provider side of the Haiku comparison.                            |
-| `COMPARISON_MODEL`  | Default model for new comparison runs; `claude-haiku-4-5`.               |
-| `OPENAI_API_KEY`    | Optional, for direct OpenAI comparisons when a GPT model is configured.  |
-| `MUBIT_CONSOLE_URL` | Optional link to your own Mubit task or project.                         |
-| `PORT`              | Local port; defaults to `4174`.                                          |
+All credentials belong in the local `.env` file and stay on the server.
 
-Without keys, the portal and local appointment-management screens still run. AI features show their unavailable state. Inference, example-recording and comparison controls make real API calls and can incur charges; starting the application does not start a training or evaluation batch.
+| Variable                            | Purpose                                                                  | Default                  |
+| ----------------------------------- | ------------------------------------------------------------------------ | ------------------------ |
+| `MUBIT_API_KEY`                     | Care routing, chat, waiting-time forecasts and Mubit comparisons         | Required for AI features |
+| `MUBIT_MODEL`                       | Care-navigation model                                                    | `claude-haiku-4-5`       |
+| `ANTHROPIC_API_KEY`                 | Direct Anthropic side of a Haiku comparison                              | Optional                 |
+| `OPENAI_API_KEY`                    | Direct OpenAI side of a GPT comparison                                   | Optional                 |
+| `COMPARISON_MODEL`                  | Model requested by new comparison runs                                   | `claude-haiku-4-5`       |
+| `MUBIT_RECORD_DEMO_REQUESTS`        | Record fictional portal care-routing inputs and outputs for Mubit review | `false`                  |
+| `MUBIT_CONSOLE_URL`                 | Link to your own Mubit project or task                                   | Unset                    |
+| `MUBIT_SHOW_DEMO_TRAINING_SNAPSHOT` | Show the original project's dated hackathon snapshot                     | `false`                  |
+| `PORT`                              | Local server port                                                        | `4174`                   |
 
-## What Mubit does here
+Model calls can incur provider charges. Start comparisons with one case; larger runs are explicit actions.
 
-The repeated task is **primary-care navigation**: turn a structured symptom intake into one of seven pathways—pharmacy, GP, nurse, physiotherapy, urgent care, emergency services or practice review.
+### Try these journeys
 
-- Synthetic historical-style inputs are sent with a consistent Haiku model, instruction and response contract.
-- Training calls use Mubit's full recording mode. Mubit reviews eligible provider answers and can train a task-specific adapter from retained examples.
-- Patient interactions default to metadata-only recording, which Mubit does not list in Requests. For fictional portal care-routing requests, set `MUBIT_RECORD_DEMO_REQUESTS=true` to store input/output and make those calls visible and eligible for training. General chat replies and endpoint comparisons remain metadata-only; evaluation content is excluded from training regardless of this setting.
-- Normal API requests use Mubit's automatic routing. The app does not invent an adapter-selection header or assume every gateway response was served by an adapter.
-- A separate conversational prompt handles chat replies. When a care summary is confirmed, the chat calls the same navigation function as the main symptom flow.
+1. **Request care:** describe a fictional mild shoulder ache lasting three weeks, review the details and follow the suggested pathway to an available appointment.
+2. **Chat:** open **Ask Wellby**, describe a concern and review its proposed care summary before continuing.
+3. **Urgent care:** use a fictional minor ankle injury and postcode `W10 6DZ` to explore the supported forecast area. Changing the severity demonstrates the urgent-review state.
+4. **Compare endpoints:** open **Practice workspace → Model comparison**, create a run and select one case. A Haiku comparison needs both Mubit and direct Anthropic keys.
 
-Saving a staff correction locally does **not** retrain a model. Recorded calls, retained examples, trained versions and live adapter serving are tracked as distinct stages. See [architecture and data flow](docs/ARCHITECTURE.md).
+## How Mubit fits
 
-### Training and evaluation evidence
+All three AI features make server-side requests through Mubit's Anthropic-compatible gateway. They have different responsibilities:
 
-At the last console check, **24 October 2026, 12:41 BST**, our Haiku navigation task showed:
+| Feature              | Input                                                                 | Output used by Wellby                                  |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| Care navigation      | Structured symptom intake and relevant health details                 | A validated pathway and next step                      |
+| Ask Wellby           | Conversation and supported application context                        | A reply or a care summary for the patient to confirm   |
+| Urgent-care forecast | Concern, arrival-time features and centre-specific historical cohorts | Validated waiting-time ranges, or escalation to review |
 
-| Evidence                                      | Observed result                   |
-| --------------------------------------------- | --------------------------------- |
-| Task calls                                    | 203                               |
-| Retained examples                             | 94                                |
-| Additional calls sent for review              | 95                                |
-| Additional calls over that day's review limit | 3                                 |
-| Existing adapter v1                           | 77.8% on 18 console-scored cases  |
-| Console quality target                        | 85%                               |
-| Serving                                       | Not ready; no linked request path |
+Care navigation maps to seven pathways: **pharmacy, GP, nurse, physiotherapy, urgent care, emergency services and practice review**. The app then handles available services, appointment slots and persistence itself.
 
-This is a dated observation, not a promise of current performance. **We have not demonstrated 90% accuracy, clinical effectiveness or production adapter serving.** A fresh checkout has its own empty local run history; private session databases and receipts are not committed.
+Mubit automatically decides how a gateway request is served. **Using the gateway is not, by itself, evidence that a trained adapter answered.** The application preserves returned models and request evidence rather than labelling every Mubit response as an adapter response.
 
-The code includes 100 original synthetic training cases, 98 additional training cases, 20 original reserved evaluation cases, and a separate 100-case comparison set. Illustrative expected routes are kept out of model inputs. They are not clinician-validated ground truth.
+### Recording, learning and evaluation
 
-## Compare the two endpoints
+- **Training:** synthetic examples use a consistent task contract and full recording. Mubit reviews eligible answers and manages example retention and adapter training.
+- **Patient journeys:** care requests default to metadata-only recording. Enable `MUBIT_RECORD_DEMO_REQUESTS` only for fictional inputs when you want their input/output recorded for review. General chat replies remain metadata-only.
+- **Evaluation:** held-out comparison cases remain separate from training and do not become training examples through the demo-recording switch.
+- **Progress:** submitted calls, retained examples, trained versions and verified serving are separate stages. Saving a local staff correction does not retrain an adapter.
 
-Open **Practice workspace → Model comparison**. Create a run and start with one case.
+Metadata-only calls may not appear in the console's Requests list. Inspect the application's receipts when checking whether a call happened. A fresh checkout does not include the original project's private run history or live training state.
 
-- **Direct Anthropic:** Haiku called with the direct provider key.
-- **Mubit automatic routing:** the same Haiku request sent through the Mubit gateway.
-- Inspect actual responses, elapsed times, returned models, usage and request receipts.
-- Failures remain in accuracy denominators. Unknown costs stay unknown. A Mubit receipt alone does not prove adapter serving.
-- Runs are saved independently; switching the default model does not relabel historical results.
+See [architecture and data flow](docs/ARCHITECTURE.md) and [urgent-care training, data and evaluation](docs/URGENT-CARE.md) for implementation details and dated evidence.
 
-For a demo, use the same held-out cases on both endpoints and show the actual serving evidence. Avoid presenting gateway results as a trained-model comparison unless that execution is verified.
+## Comparing direct calls with Mubit
 
-## Project layout
+The comparison workspace runs the same held-out cases through two endpoints:
+
+| Left side                                            | Right side                          |
+| ---------------------------------------------------- | ----------------------------------- |
+| Direct Anthropic for Haiku, or direct OpenAI for GPT | The corresponding Mubit gateway     |
+| Provider key                                         | Mubit key                           |
+| Same model request and case content                  | Same model request and case content |
+
+Each run tracks route accuracy against the synthetic expected answers, response time, token usage, available cost information and request receipts. Failures remain in accuracy denominators; missing cost data remains unknown. Historical runs keep their original model labels.
+
+The 100-case comparison set measures agreement with authored expected routes, not clinical effectiveness. Adapter-serving claims require serving evidence, and video preview figures are separate from these stored measurements.
+
+## Development
+
+| Command                | Purpose                                                               |
+| ---------------------- | --------------------------------------------------------------------- |
+| `npm run dev`          | Start the local app with server watching and Vite development tooling |
+| `npm test`             | Run offline workflow and integrity tests; no paid inference           |
+| `npm run build`        | Check TypeScript and create the production frontend                   |
+| `npm start`            | Serve the built app locally                                           |
+| `npm run format:check` | Check source and documentation formatting                             |
 
 ```text
-src/       React patient portal, care flow, chat and practice workspace
-server/    Express API, model clients, SQLite storage and offline tests
-shared/    Types, pathways and comparison contracts
-public/    Static assets and photography credits
-docs/      Architecture and demo-video storyboard
+src/        Patient portal, guided care flow, chat and practice workspace
+server/     Express API, model clients, SQLite storage and tests
+shared/     Pathways, departments, types and API contracts
+data/       Sourced UK service-directory data and attribution
+public/     Static assets and photography credits
+docs/       Architecture, urgent-care implementation and video notes
+demo/       Final MP4, PDF deck and verification reports
 ```
 
-Local account details, conversations, requests, bookings, model receipts and results live in `.wellby/practice.sqlite`. The entire `.wellby/` directory is excluded from Git. Existing data is retained across restarts.
+**Stack:** React 19, TypeScript, Vite, Express, SQLite, Radix UI and Lucide.
 
-## Scope and limitations
+Local accounts, profile photos, conversations, requests, bookings and measured results are stored in `.wellby/practice.sqlite` and persist across restarts. `.wellby/` and `.env` are excluded from Git.
 
-This is a locally hosted hackathon application. Sign-in separates demo accounts, but the practice workspace is not a production staff-access system. Email, password reset, real clinical integrations and real appointment systems are not connected. Safety escalation is part of the demonstration and is not a clinically validated triage system.
+## Scope and credits
 
-## Demo and credits
+Wellby is a hackathon demonstration with fictional patients, historical encounters and appointment availability. It does not diagnose conditions, connect to NHS booking systems or create real healthcare appointments. The practice workspace and local authentication are not a production clinical access-control system.
 
-- [97-second final product video and PDF deck](demo/README.md)
-- [Video chapters and production notes](docs/DEMO_VIDEO.md)
-- [Architecture and Mubit integration](docs/ARCHITECTURE.md)
-- [Stock-photography credits](public/photo-credits.txt). Portraits illustrate fictional identities and do not imply endorsement.
-- [Mubit: first adapter](https://docs.mubit.ai/guides/first-adapter)
-- [Mubit: Anthropic integration](https://docs.mubit.ai/guides/connect-anthropic)
-
-Built with React, TypeScript, Vite, Express, SQLite, Radix UI and Lucide.
-
-## Urgent care waiting times
-
-The patient home includes a UK postcode urgent-care finder with sourced service locations in all four nations. Mubit waiting-time forecasts are available for the three centres covered by the historical cohort. The results list shows only centres with complete forecasts. Severe or worsening symptoms switch to urgent advice. See [setup, data and verified results](docs/URGENT-CARE.md). The dedicated task has 500 recorded calls awaiting Mubit review; 100 evaluation cases remain separate. **Practice workspace → Urgent care** displays training progress, held-out evaluation metrics, request receipts and explicit test controls.
+- [UK service-directory sources and licences](data/uk-services/README.md)
+- [Portrait photography credits](public/photo-credits.txt)—photos represent fictional identities and do not imply endorsement.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Urgent-care implementation](docs/URGENT-CARE.md)
+- [Final video production notes](docs/DEMO_VIDEO.md)
